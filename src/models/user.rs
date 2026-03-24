@@ -1,10 +1,12 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 use uuid::Uuid;
 use validator::Validate;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct User {
+    #[schema(value_type = String)]
     pub id: Uuid,
     pub email: String,
     pub google_id: Option<String>,
@@ -13,11 +15,13 @@ pub struct User {
     pub avatar_url: Option<String>,
     pub preferred_language: Option<String>,
     pub theme: Option<String>,
+    #[schema(value_type = String)]
     pub created_at: DateTime<Utc>,
+    #[schema(value_type = String)]
     pub updated_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Deserialize, Validate)]
+#[derive(Debug, Deserialize, Validate, ToSchema)]
 pub struct CreateUser {
     #[validate(email)]
     pub email: String,
@@ -27,13 +31,13 @@ pub struct CreateUser {
     pub avatar_url: Option<String>,
 }
 
-#[derive(Debug, Deserialize, Validate)]
+#[derive(Debug, Deserialize, Validate, ToSchema)]
 pub struct UpdateUser {
     pub preferred_language: Option<String>,
     pub theme: Option<String>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct UserStats {
     pub completed_courses: i64,
     pub community_contributions: i64,

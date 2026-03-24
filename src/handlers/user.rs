@@ -9,6 +9,17 @@ use axum::{
 use uuid::Uuid;
 use validator::Validate;
 
+#[utoipa::path(
+    get,
+    path = "/api/v1/users/me",
+    responses(
+        (status = 200, description = "Current user profile", body = User)
+    ),
+    tag = "Users",
+    security(
+        ("bearerAuth" = [])
+    )
+)]
 pub async fn get_me(
     State(state): State<SharedState>,
     auth_user: AuthUser,
@@ -18,6 +29,18 @@ pub async fn get_me(
     Ok(Json(user))
 }
 
+#[utoipa::path(
+    put,
+    path = "/api/v1/users/me",
+    request_body = UpdateUser,
+    responses(
+        (status = 200, description = "User profile updated", body = User)
+    ),
+    tag = "Users",
+    security(
+        ("bearerAuth" = [])
+    )
+)]
 pub async fn update_me(
     State(state): State<SharedState>,
     auth_user: AuthUser,
@@ -30,6 +53,17 @@ pub async fn update_me(
     Ok(Json(user))
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/v1/users/{id}/stats",
+    params(
+        ("id" = Uuid, Path, description = "User ID")
+    ),
+    responses(
+        (status = 200, description = "User stats", body = UserStats)
+    ),
+    tag = "Users"
+)]
 pub async fn get_stats(
     State(state): State<SharedState>,
     Path(id): Path<Uuid>,

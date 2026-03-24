@@ -12,6 +12,17 @@ use std::convert::Infallible;
 use tokio_stream::wrappers::BroadcastStream;
 use uuid::Uuid;
 
+#[utoipa::path(
+    get,
+    path = "/api/v1/stream/notifications",
+    responses(
+        (status = 200, description = "SSE stream for notifications")
+    ),
+    tag = "Notifications",
+    security(
+        ("bearerAuth" = [])
+    )
+)]
 pub async fn sse_stream(
     State(state): State<SharedState>,
     auth_user: AuthUser,
@@ -45,6 +56,17 @@ pub async fn sse_stream(
     )
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/v1/notifications",
+    responses(
+        (status = 200, description = "List of user notifications", body = Vec<Notification>)
+    ),
+    tag = "Notifications",
+    security(
+        ("bearerAuth" = [])
+    )
+)]
 pub async fn list_notifications(
     State(state): State<SharedState>,
     auth_user: AuthUser,
@@ -53,6 +75,20 @@ pub async fn list_notifications(
     Ok(Json(notifications))
 }
 
+#[utoipa::path(
+    put,
+    path = "/api/v1/notifications/{id}/read",
+    params(
+        ("id" = Uuid, Path, description = "Notification ID")
+    ),
+    responses(
+        (status = 200, description = "Notification marked as read", body = Notification)
+    ),
+    tag = "Notifications",
+    security(
+        ("bearerAuth" = [])
+    )
+)]
 pub async fn mark_as_read(
     State(state): State<SharedState>,
     auth_user: AuthUser,
@@ -62,6 +98,17 @@ pub async fn mark_as_read(
     Ok(Json(notification))
 }
 
+#[utoipa::path(
+    put,
+    path = "/api/v1/notifications/read-all",
+    responses(
+        (status = 200, description = "All notifications marked as read")
+    ),
+    tag = "Notifications",
+    security(
+        ("bearerAuth" = [])
+    )
+)]
 pub async fn mark_all_as_read(
     State(state): State<SharedState>,
     auth_user: AuthUser,

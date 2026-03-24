@@ -20,6 +20,95 @@ use tower_http::trace::TraceLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use std::time::Duration;
 use migration::{Migrator, MigratorTrait};
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
+
+#[derive(OpenApi)]
+#[openapi(
+    paths(
+        handlers::auth::google_login,
+        handlers::auth::guest_login,
+        handlers::user::get_me,
+        handlers::user::update_me,
+        handlers::user::get_stats,
+        handlers::course::list_courses,
+        handlers::course::get_course,
+        handlers::course::get_chapter,
+        handlers::progress::get_progress,
+        handlers::progress::save_chapter_progress,
+        handlers::progress::get_certifications,
+        handlers::progress::generate_cert,
+        handlers::community::list_threads,
+        handlers::community::create_thread,
+        handlers::community::get_thread,
+        handlers::community::update_thread,
+        handlers::community::delete_thread,
+        handlers::community::add_thread_comment,
+        handlers::community::toggle_like_thread,
+        handlers::community::toggle_like_comment,
+        handlers::notification::list_notifications,
+        handlers::notification::mark_as_read,
+        handlers::notification::mark_all_as_read,
+        handlers::notification::sse_stream,
+        handlers::sandbox::execute_code,
+        handlers::post::list_posts,
+        handlers::post::get_post,
+        handlers::ai::tts_proxy,
+        handlers::ai::image_edit_proxy,
+        handlers::contact::submit_inquiry,
+    ),
+    components(
+        schemas(
+            models::user::User,
+            models::user::CreateUser,
+            models::user::UpdateUser,
+            models::user::UserStats,
+            models::course::Course,
+            models::course::Module,
+            models::course::Chapter,
+            models::course::CourseDetails,
+            models::course::ModuleDetails,
+            models::course::ChapterSummary,
+            models::progress::Progress,
+            models::progress::Certification,
+            models::progress::QuizSubmission,
+            models::progress::QuizResult,
+            models::community::Thread,
+            models::community::Comment,
+            models::community::CreateThreadRequest,
+            models::community::UpdateThreadRequest,
+            models::community::CreateCommentRequest,
+            models::community::ThreadWithComments,
+            models::notification::Notification,
+            models::notification::CreateNotification,
+            models::post::Post,
+            models::post::PostSummary,
+            models::contact::Inquiry,
+            models::contact::SubmitInquiryRequest,
+            handlers::auth::GoogleLoginRequest,
+            handlers::auth::AuthResponse,
+            handlers::sandbox::ExecuteCodeRequest,
+            handlers::sandbox::ExecuteCodeResponse,
+            handlers::ai::TtsRequest,
+            handlers::ai::TtsResponse,
+            handlers::ai::ImageEditRequest,
+            handlers::ai::ImageEditResponse,
+        )
+    ),
+    tags(
+        (name = "Auth", description = "Authentication Endpoints"),
+        (name = "Users", description = "User Management Endpoints"),
+        (name = "Courses", description = "Course Content Endpoints"),
+        (name = "Progress", description = "User Progress and Certification Endpoints"),
+        (name = "Community", description = "Forums and Discussion Endpoints"),
+        (name = "Notifications", description = "Real-time Notification Endpoints"),
+        (name = "Posts", description = "Blog Posts Endpoints"),
+        (name = "Sandbox", description = "WASM Execution Sandbox Endpoints"),
+        (name = "AI", description = "AI Integration Proxies"),
+        (name = "Contact", description = "Contact Forms and Inquiries")
+    ),
+)]
+pub struct ApiDoc;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -175,6 +264,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .nest("/contact", contact_routes);
 
     let app = Router::new()
+        .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
         .nest("/api/v1", api_routes)
         .layer(TraceLayer::new_for_http())
         .layer(cors)

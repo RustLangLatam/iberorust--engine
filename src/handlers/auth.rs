@@ -2,17 +2,29 @@ use crate::error::AppError;
 use crate::state::SharedState;
 use axum::{extract::State, Json};
 use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
+use validator::Validate;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Validate, ToSchema)]
 pub struct GoogleLoginRequest {
+    #[validate(length(min = 1, message = "Google token is required"))]
     pub google_token: String,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, ToSchema)]
 pub struct AuthResponse {
     pub token: String,
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/auth/google",
+    request_body = GoogleLoginRequest,
+    responses(
+        (status = 200, description = "Successful login", body = AuthResponse)
+    ),
+    tag = "Auth"
+)]
 pub async fn google_login(
     State(state): State<SharedState>,
     Json(payload): Json<GoogleLoginRequest>,
@@ -21,6 +33,14 @@ pub async fn google_login(
     Ok(Json(AuthResponse { token }))
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/auth/guest",
+    responses(
+        (status = 200, description = "Successful guest login", body = AuthResponse)
+    ),
+    tag = "Auth"
+)]
 pub async fn guest_login(State(state): State<SharedState>) -> Result<Json<AuthResponse>, AppError> {
     let token = state.auth_service.login_guest().await?;
     Ok(Json(AuthResponse { token }))

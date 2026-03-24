@@ -8,6 +8,17 @@ use axum::{
 };
 use uuid::Uuid;
 
+#[utoipa::path(
+    get,
+    path = "/api/v1/progress",
+    responses(
+        (status = 200, description = "Current user progress", body = Vec<Progress>)
+    ),
+    tag = "Progress",
+    security(
+        ("bearerAuth" = [])
+    )
+)]
 pub async fn get_progress(
     State(state): State<SharedState>,
     auth_user: AuthUser,
@@ -16,6 +27,21 @@ pub async fn get_progress(
     Ok(Json(progress))
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/progress/chapters/{chapter_id}",
+    params(
+        ("chapter_id" = Uuid, Path, description = "Chapter ID")
+    ),
+    request_body(content = Option<QuizSubmission>, description = "Optional quiz submission answers"),
+    responses(
+        (status = 200, description = "Chapter progress saved. Returns quiz result if applicable.", body = Option<QuizResult>)
+    ),
+    tag = "Progress",
+    security(
+        ("bearerAuth" = [])
+    )
+)]
 pub async fn save_chapter_progress(
     State(state): State<SharedState>,
     auth_user: AuthUser,
@@ -29,6 +55,17 @@ pub async fn save_chapter_progress(
     Ok(Json(result))
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/v1/certifications",
+    responses(
+        (status = 200, description = "List of user certifications", body = Vec<Certification>)
+    ),
+    tag = "Progress",
+    security(
+        ("bearerAuth" = [])
+    )
+)]
 pub async fn get_certifications(
     State(state): State<SharedState>,
     auth_user: AuthUser,
@@ -37,6 +74,21 @@ pub async fn get_certifications(
     Ok(Json(certs))
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/certifications/generate/{course_id}",
+    params(
+        ("course_id" = Uuid, Path, description = "Course ID")
+    ),
+    responses(
+        (status = 200, description = "Certification generated successfully", body = Certification),
+        (status = 403, description = "Course is not fully completed")
+    ),
+    tag = "Progress",
+    security(
+        ("bearerAuth" = [])
+    )
+)]
 pub async fn generate_cert(
     State(state): State<SharedState>,
     auth_user: AuthUser,

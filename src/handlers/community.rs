@@ -11,6 +11,14 @@ use axum::{
 };
 use uuid::Uuid;
 
+#[utoipa::path(
+    get,
+    path = "/api/v1/threads",
+    responses(
+        (status = 200, description = "List of discussion threads", body = Vec<Thread>)
+    ),
+    tag = "Community"
+)]
 pub async fn list_threads(
     State(state): State<SharedState>,
 ) -> Result<Json<Vec<Thread>>, AppError> {
@@ -18,6 +26,17 @@ pub async fn list_threads(
     Ok(Json(threads))
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/v1/threads/{id}",
+    params(
+        ("id" = Uuid, Path, description = "Thread ID")
+    ),
+    responses(
+        (status = 200, description = "Thread details and nested comments", body = ThreadWithComments)
+    ),
+    tag = "Community"
+)]
 pub async fn get_thread(
     State(state): State<SharedState>,
     Path(id): Path<Uuid>,
@@ -28,6 +47,18 @@ pub async fn get_thread(
 
 use validator::Validate;
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/threads",
+    request_body = CreateThreadRequest,
+    responses(
+        (status = 201, description = "Thread created successfully", body = Thread)
+    ),
+    tag = "Community",
+    security(
+        ("bearerAuth" = [])
+    )
+)]
 pub async fn create_thread(
     State(state): State<SharedState>,
     auth_user: AuthUser,
@@ -39,6 +70,21 @@ pub async fn create_thread(
     Ok((StatusCode::CREATED, Json(thread)))
 }
 
+#[utoipa::path(
+    put,
+    path = "/api/v1/threads/{id}",
+    params(
+        ("id" = Uuid, Path, description = "Thread ID")
+    ),
+    request_body = UpdateThreadRequest,
+    responses(
+        (status = 200, description = "Thread updated successfully", body = Thread)
+    ),
+    tag = "Community",
+    security(
+        ("bearerAuth" = [])
+    )
+)]
 pub async fn update_thread(
     State(state): State<SharedState>,
     auth_user: AuthUser,
@@ -51,6 +97,20 @@ pub async fn update_thread(
     Ok(Json(thread))
 }
 
+#[utoipa::path(
+    delete,
+    path = "/api/v1/threads/{id}",
+    params(
+        ("id" = Uuid, Path, description = "Thread ID")
+    ),
+    responses(
+        (status = 204, description = "Thread deleted successfully")
+    ),
+    tag = "Community",
+    security(
+        ("bearerAuth" = [])
+    )
+)]
 pub async fn delete_thread(
     State(state): State<SharedState>,
     auth_user: AuthUser,
@@ -60,6 +120,21 @@ pub async fn delete_thread(
     Ok(StatusCode::NO_CONTENT)
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/threads/{id}/comments",
+    params(
+        ("id" = Uuid, Path, description = "Thread ID")
+    ),
+    request_body = CreateCommentRequest,
+    responses(
+        (status = 201, description = "Comment added successfully", body = Comment)
+    ),
+    tag = "Community",
+    security(
+        ("bearerAuth" = [])
+    )
+)]
 pub async fn add_thread_comment(
     State(state): State<SharedState>,
     auth_user: AuthUser,
@@ -72,6 +147,20 @@ pub async fn add_thread_comment(
     Ok((StatusCode::CREATED, Json(comment)))
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/threads/{id}/like",
+    params(
+        ("id" = Uuid, Path, description = "Thread ID")
+    ),
+    responses(
+        (status = 200, description = "Thread like toggled")
+    ),
+    tag = "Community",
+    security(
+        ("bearerAuth" = [])
+    )
+)]
 pub async fn toggle_like_thread(
     State(state): State<SharedState>,
     auth_user: AuthUser,
@@ -81,6 +170,20 @@ pub async fn toggle_like_thread(
     Ok(StatusCode::OK)
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/comments/{id}/like",
+    params(
+        ("id" = Uuid, Path, description = "Comment ID")
+    ),
+    responses(
+        (status = 200, description = "Comment like toggled")
+    ),
+    tag = "Community",
+    security(
+        ("bearerAuth" = [])
+    )
+)]
 pub async fn toggle_like_comment(
     State(state): State<SharedState>,
     auth_user: AuthUser,

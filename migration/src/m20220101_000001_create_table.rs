@@ -135,10 +135,15 @@ CREATE TABLE IF NOT EXISTS inquiries (
         "#;
 
         let backend = manager.get_database_backend();
-        manager
-            .get_connection()
-            .execute(Statement::from_string(backend, sql.to_owned()))
-            .await?;
+        for statement in sql.split(';') {
+            let stmt = statement.trim();
+            if !stmt.is_empty() {
+                manager
+                    .get_connection()
+                    .execute(Statement::from_string(backend, stmt.to_owned()))
+                    .await?;
+            }
+        }
 
         Ok(())
     }
@@ -161,10 +166,15 @@ DROP TABLE IF EXISTS users;
         "#;
 
         let backend = manager.get_database_backend();
-        manager
-            .get_connection()
-            .execute(Statement::from_string(backend, sql.to_owned()))
-            .await?;
+        for statement in sql.split(';') {
+            let stmt = statement.trim();
+            if !stmt.is_empty() {
+                manager
+                    .get_connection()
+                    .execute(Statement::from_string(backend, stmt.to_owned()))
+                    .await?;
+            }
+        }
 
         Ok(())
     }

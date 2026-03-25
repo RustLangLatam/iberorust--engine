@@ -25,11 +25,12 @@ pub struct GoogleTokenInfo {
 
 pub struct AuthService {
     user_repo: Arc<dyn UserRepository>,
+    jwt_secret: String,
 }
 
 impl AuthService {
-    pub fn new(user_repo: Arc<dyn UserRepository>) -> Self {
-        Self { user_repo }
+    pub fn new(user_repo: Arc<dyn UserRepository>, jwt_secret: String) -> Self {
+        Self { user_repo, jwt_secret }
     }
 
     pub fn generate_jwt(&self, user_id: Uuid, email: &str, is_guest: bool) -> Result<String, AppError> {
@@ -46,14 +47,10 @@ impl AuthService {
             exp: expiration,
         };
 
-        let secret = std::env::var("JWT_SECRET").map_err(|_| {
-            AppError::InternalServerError(anyhow::anyhow!("JWT_SECRET not set in environment"))
-        })?;
-
         encode(
             &Header::default(),
             &claims,
-            &EncodingKey::from_secret(secret.as_bytes()),
+            &EncodingKey::from_secret(self.jwt_secret.as_bytes()),
         )
         .map_err(|e| AppError::InternalServerError(anyhow::anyhow!("JWT encoding error: {}", e)))
     }

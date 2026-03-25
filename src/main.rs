@@ -1,3 +1,4 @@
+pub mod config;
 pub mod error;
 pub mod handlers;
 pub mod middlewares;
@@ -112,26 +113,26 @@ pub struct ApiDoc;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let app_config = config::AppConfig::load()?;
+    let config_arc = Arc::new(app_config.clone());
+
     tracing_subscriber::registry()
         .with(
             tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "app=debug,tower_http=debug".into()),
+                .unwrap_or_else(|_| app_config.logging.level.clone().into()),
         )
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    let db_url = std::env::var("DATABASE_URL")
-        .unwrap_or_else(|_| "postgres://postgres:postgres@localhost:5432/rustedu".to_string());
-
     tracing::info!("Connecting to database...");
 
-    let mut opt = ConnectOptions::new(db_url);
-    opt.max_connections(5)
-        .min_connections(1)
-        .connect_timeout(Duration::from_secs(8))
-        .idle_timeout(Duration::from_secs(8))
-        .max_lifetime(Duration::from_secs(8))
-        .sqlx_logging(true);
+    let mut opt = ConnectOptions::new(app_config.database.url.clone());
+    opt.max_connections(app_config.database.max_connections)
+        .min_connections(app_config.database.min_connections)
+        .connect_timeout(Duration::from_secs(app_config.database.connect_timeout))
+        .idle_timeout(Duration::from_secs(app_config.database.idle_timeout))
+        .max_lifetime(Duration::from_secs(app_config.database.max_lifetime))
+        .sqlx_logging(app_config.database.sqlx_logging);
 
     let db = Database::connect(opt).await?;
 
@@ -152,7 +153,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let contact_repo = Arc::new(repositories::contact::ContactRepositoryImpl { db: db.clone() });
 
-    let auth_service = Arc::new(services::auth::AuthService::new(user_repo.clone()));
+    let auth_service = Arc::new(services::auth::AuthService::new(user_repo.clone(), app_config.auth.jwt_secret.clone()));
     let user_service = Arc::new(services::user::UserService::new(user_repo.clone()));
     let course_service = Arc::new(services::course::CourseService::new(course_repo.clone()));
     let progress_service = Arc::new(services::progress::ProgressService::new(
@@ -169,6 +170,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let contact_service = Arc::new(services::contact::ContactService::new(contact_repo.clone()));
 
     let state: SharedState = Arc::new(AppState {
+        config: config_arc,
         sse_sender,
         user_repo,
         course_repo,
@@ -270,8 +272,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .layer(cors)
         .with_state(state);
 
-    let port = std::env::var("PORT").unwrap_or_else(|_| "3000".to_string());
-    let addr = format!("0.0.0.0:{}", port);
+    let addr = format!("{}:{}", app_config.server.host, app_config.server.port);
     tracing::info!("Listening on {}", addr);
 
     let listener = tokio::net::TcpListener::bind(&addr).await?;

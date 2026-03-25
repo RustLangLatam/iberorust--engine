@@ -8,6 +8,7 @@ use crate::repositories::{
     user::UserRepository,
 };
 use crate::services::auth::AuthService;
+use crate::config::AppConfig;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tokio::sync::broadcast;
@@ -28,6 +29,7 @@ pub struct NotificationMessage {
 }
 
 pub struct AppState {
+    pub config: Arc<AppConfig>,
     pub sse_sender: broadcast::Sender<NotificationMessage>,
 
     // Repositories

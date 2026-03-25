@@ -32,11 +32,18 @@ pub struct AuthConfig {
 }
 
 #[derive(Debug, Deserialize, Clone)]
+pub struct AdminConfig {
+    pub default_email: String,
+    pub default_password: String,
+}
+
+#[derive(Debug, Deserialize, Clone)]
 pub struct AppConfig {
     pub server: ServerConfig,
     pub database: DatabaseConfig,
     pub logging: LoggingConfig,
     pub auth: AuthConfig,
+    pub admin: AdminConfig,
 }
 
 impl AppConfig {

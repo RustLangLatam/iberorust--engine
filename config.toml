@@ -16,3 +16,7 @@ level = "app=debug,tower_http=debug"
 
 [auth]
 jwt_secret = "your_super_secret_jwt_key_here"
+
+[admin]
+default_email = "admin@rustedu.com"
+default_password = "secure_admin_password_123"

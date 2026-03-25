@@ -23,6 +23,11 @@ use std::time::Duration;
 use migration::{Migrator, MigratorTrait};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
+use argon2::{
+    password_hash::{rand_core::OsRng, PasswordHasher, SaltString},
+    Argon2,
+};
+use sea_orm::Set;
 
 #[derive(OpenApi)]
 #[openapi(
@@ -154,6 +159,58 @@ use utoipa_swagger_ui::SwaggerUi;
 )]
 pub struct ApiDoc;
 
+async fn seed_admin_user(db: &sea_orm::DatabaseConnection, config: &config::AdminConfig) -> Result<(), Box<dyn std::error::Error>> {
+    use crate::entities::user as UserEntity;
+    use sea_orm::{EntityTrait, ColumnTrait, QueryFilter};
+    use chrono::Utc;
+    use uuid::Uuid;
+    use sea_orm::ActiveModelTrait;
+
+    let admin_exists = UserEntity::Entity::find()
+        .filter(UserEntity::Column::Email.eq(&config.default_email))
+        .one(db)
+        .await?;
+
+    if admin_exists.is_none() {
+        tracing::info!("Admin user not found. Seeding default admin...");
+
+        let salt = SaltString::generate(&mut OsRng);
+        let argon2 = Argon2::default();
+        let _password_hash = argon2
+            .hash_password(config.default_password.as_bytes(), &salt)
+            .map_err(|e| anyhow::anyhow!("Argon2 hash failed: {}", e))?
+            .to_string();
+
+        // Assuming there might be a password column, although UserEntity currently
+        // doesn't define it in models/entities based on exploration, it is often tied
+        // to Google auth or external login. If standard password auth isn't natively
+        // stored in DB for now, we still create the user with role 'ADMIN'.
+
+        let new_user = UserEntity::ActiveModel {
+            id: Set(Uuid::new_v4()),
+            email: Set(config.default_email.clone()),
+            google_id: Set(None), // Not a Google user
+            is_guest: Set(false),
+            name: Set("System Admin".to_string()),
+            avatar_url: Set(None),
+            preferred_language: Set(Some("EN".to_string())),
+            theme: Set(Some("system".to_string())),
+            role: Set("ADMIN".to_string()),
+            created_at: Set(Utc::now()),
+            updated_at: Set(Utc::now()),
+            // If password column exists, set it. For now, creating the user ensures it is recognized by role.
+            // ..Default::default()
+        };
+
+        new_user.insert(db).await?;
+        tracing::info!("Default admin user created successfully.");
+    } else {
+        tracing::info!("Admin user already exists. Skipping seed.");
+    }
+
+    Ok(())
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let app_config = config::AppConfig::load()?;
@@ -181,6 +238,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     tracing::info!("Running migrations...");
     Migrator::up(&db, None).await?;
+
+    tracing::info!("Checking for default admin seed...");
+    seed_admin_user(&db, &app_config.admin).await?;
 
     // Create the SSE broadcast channel
     let (sse_sender, _rx) = broadcast::channel(100);

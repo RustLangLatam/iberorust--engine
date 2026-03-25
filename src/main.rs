@@ -159,15 +159,18 @@ use sea_orm::Set;
 )]
 pub struct ApiDoc;
 
-async fn seed_admin_user(db: &sea_orm::DatabaseConnection, config: &config::AdminConfig) -> Result<(), Box<dyn std::error::Error>> {
+async fn seed_admin_user(db: &sea_orm::DatabaseConnection) -> Result<(), Box<dyn std::error::Error>> {
     use crate::entities::user as UserEntity;
     use sea_orm::{EntityTrait, ColumnTrait, QueryFilter};
     use chrono::Utc;
     use uuid::Uuid;
     use sea_orm::ActiveModelTrait;
 
+    let default_email = "admin@rustedu.com".to_string();
+    let default_password = "secure_admin_password_123";
+
     let admin_exists = UserEntity::Entity::find()
-        .filter(UserEntity::Column::Email.eq(&config.default_email))
+        .filter(UserEntity::Column::Email.eq(&default_email))
         .one(db)
         .await?;
 
@@ -177,7 +180,7 @@ async fn seed_admin_user(db: &sea_orm::DatabaseConnection, config: &config::Admi
         let salt = SaltString::generate(&mut OsRng);
         let argon2 = Argon2::default();
         let _password_hash = argon2
-            .hash_password(config.default_password.as_bytes(), &salt)
+            .hash_password(default_password.as_bytes(), &salt)
             .map_err(|e| anyhow::anyhow!("Argon2 hash failed: {}", e))?
             .to_string();
 
@@ -188,7 +191,7 @@ async fn seed_admin_user(db: &sea_orm::DatabaseConnection, config: &config::Admi
 
         let new_user = UserEntity::ActiveModel {
             id: Set(Uuid::new_v4()),
-            email: Set(config.default_email.clone()),
+            email: Set(default_email),
             google_id: Set(None), // Not a Google user
             is_guest: Set(false),
             name: Set("System Admin".to_string()),
@@ -240,7 +243,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     Migrator::up(&db, None).await?;
 
     tracing::info!("Checking for default admin seed...");
-    seed_admin_user(&db, &app_config.admin).await?;
+    seed_admin_user(&db).await?;
 
     // Create the SSE broadcast channel
     let (sse_sender, _rx) = broadcast::channel(100);

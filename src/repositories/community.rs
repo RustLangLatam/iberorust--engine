@@ -1,6 +1,6 @@
 use crate::entities::{comment, comment_like, thread as ThreadEntity, thread_like};
 use crate::error::AppError;
-use crate::models::community::{Comment, CreateThreadRequest, Thread, UpdateThreadRequest};
+use crate::models::community::{Comment, CreateThreadRequest, Thread, UpdateComment, UpdateThreadRequest};
 use async_trait::async_trait;
 #[cfg(test)]
 use mockall::automock;
@@ -20,6 +20,10 @@ pub trait CommunityRepository: Send + Sync {
     async fn add_comment(&self, thread_id: Uuid, author_id: Uuid, content: String) -> Result<Comment, AppError>;
     async fn toggle_thread_like(&self, thread_id: Uuid, user_id: Uuid) -> Result<(), AppError>;
     async fn toggle_comment_like(&self, comment_id: Uuid, user_id: Uuid) -> Result<(), AppError>;
+
+    async fn get_comment(&self, comment_id: Uuid) -> Result<Option<Comment>, AppError>;
+    async fn update_comment(&self, comment_id: Uuid, req: UpdateComment) -> Result<Comment, AppError>;
+    async fn delete_comment(&self, comment_id: Uuid) -> Result<(), AppError>;
 }
 
 pub struct CommunityRepositoryImpl {
@@ -281,6 +285,35 @@ impl CommunityRepository for CommunityRepositoryImpl {
         }
 
         txn.commit().await?;
+        Ok(())
+    }
+
+    async fn get_comment(&self, comment_id: Uuid) -> Result<Option<Comment>, AppError> {
+        let c = comment::Entity::find_by_id(comment_id)
+            .one(&self.db)
+            .await?;
+        Ok(c.map(Comment::from))
+    }
+
+    async fn update_comment(&self, comment_id: Uuid, req: UpdateComment) -> Result<Comment, AppError> {
+        let mut c: comment::ActiveModel = comment::Entity::find_by_id(comment_id)
+            .one(&self.db)
+            .await?
+            .ok_or_else(|| AppError::NotFound("Comment not found".to_string()))?
+            .into();
+
+        c.content = Set(req.content);
+        c.updated_at = Set(Utc::now());
+
+        let updated = c.update(&self.db).await?;
+        Ok(Comment::from(updated))
+    }
+
+    async fn delete_comment(&self, comment_id: Uuid) -> Result<(), AppError> {
+        let result = comment::Entity::delete_by_id(comment_id).exec(&self.db).await?;
+        if result.rows_affected == 0 {
+            return Err(AppError::NotFound("Comment not found".to_string()));
+        }
         Ok(())
     }
 }

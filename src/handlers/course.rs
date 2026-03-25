@@ -1,5 +1,5 @@
 use crate::error::AppError;
-use crate::models::course::{Chapter, Course, CourseDetails};
+use crate::models::course::{Chapter, Course, CourseDetails, CreateCourse, UpdateCourse};
 use crate::state::SharedState;
 use axum::{
     extract::{Path, State},
@@ -57,4 +57,73 @@ pub async fn get_chapter(
 ) -> Result<Json<Chapter>, AppError> {
     let chapter = state.course_service.get_chapter_details(course_id, chapter_id).await?;
     Ok(Json(chapter))
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/courses",
+    request_body = CreateCourse,
+    responses(
+        (status = 200, description = "Course created", body = Course)
+    ),
+    security(
+        ("bearerAuth" = [])
+    ),
+    tag = "Courses"
+)]
+pub async fn create_course(
+    State(state): State<SharedState>,
+    _admin: crate::middlewares::auth::AdminUser,
+    Json(payload): Json<crate::models::course::CreateCourse>,
+) -> Result<Json<Course>, AppError> {
+    let course = state.course_service.create_course(payload).await?;
+    Ok(Json(course))
+}
+
+#[utoipa::path(
+    put,
+    path = "/api/v1/courses/{id}",
+    params(
+        ("id" = Uuid, Path, description = "Course ID")
+    ),
+    request_body = UpdateCourse,
+    responses(
+        (status = 200, description = "Course updated", body = Course)
+    ),
+    security(
+        ("bearerAuth" = [])
+    ),
+    tag = "Courses"
+)]
+pub async fn update_course(
+    State(state): State<SharedState>,
+    Path(id): Path<Uuid>,
+    _admin: crate::middlewares::auth::AdminUser,
+    Json(payload): Json<crate::models::course::UpdateCourse>,
+) -> Result<Json<Course>, AppError> {
+    let course = state.course_service.update_course(id, payload).await?;
+    Ok(Json(course))
+}
+
+#[utoipa::path(
+    delete,
+    path = "/api/v1/courses/{id}",
+    params(
+        ("id" = Uuid, Path, description = "Course ID")
+    ),
+    responses(
+        (status = 204, description = "Course deleted")
+    ),
+    security(
+        ("bearerAuth" = [])
+    ),
+    tag = "Courses"
+)]
+pub async fn delete_course(
+    State(state): State<SharedState>,
+    Path(id): Path<Uuid>,
+    _admin: crate::middlewares::auth::AdminUser,
+) -> Result<axum::http::StatusCode, AppError> {
+    state.course_service.delete_course(id).await?;
+    Ok(axum::http::StatusCode::NO_CONTENT)
 }

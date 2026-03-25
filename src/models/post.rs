@@ -29,3 +29,17 @@ pub struct PostSummary {
     #[schema(value_type = String)]
     pub published_at: Option<DateTime<Utc>>,
 }
+
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct CreatePost {
+    pub title: String,
+    pub content: String,
+    pub published_at: Option<DateTime<Utc>>,
+}
+
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct UpdatePost {
+    pub title: Option<String>,
+    pub content: Option<String>,
+    pub published_at: Option<DateTime<Utc>>,
+}

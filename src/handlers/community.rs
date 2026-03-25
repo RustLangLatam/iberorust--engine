@@ -1,7 +1,7 @@
 use crate::error::AppError;
 use crate::middlewares::auth::AuthUser;
 use crate::models::community::{
-    Comment, CreateCommentRequest, CreateThreadRequest, Thread, ThreadWithComments, UpdateThreadRequest,
+    Comment, CreateCommentRequest, CreateThreadRequest, Thread, ThreadWithComments, UpdateComment, UpdateThreadRequest,
 };
 use crate::state::SharedState;
 use axum::{
@@ -191,4 +191,53 @@ pub async fn toggle_like_comment(
 ) -> Result<StatusCode, AppError> {
     state.community_service.like_comment(id, auth_user.id).await?;
     Ok(StatusCode::OK)
+}
+
+#[utoipa::path(
+    put,
+    path = "/api/v1/comments/{id}",
+    params(
+        ("id" = Uuid, Path, description = "Comment ID")
+    ),
+    request_body = UpdateComment,
+    responses(
+        (status = 200, description = "Comment updated", body = Comment)
+    ),
+    tag = "Community",
+    security(
+        ("bearerAuth" = [])
+    )
+)]
+pub async fn update_comment(
+    State(state): State<SharedState>,
+    auth_user: AuthUser,
+    Path(id): Path<Uuid>,
+    Json(payload): Json<UpdateComment>,
+) -> Result<Json<Comment>, AppError> {
+    payload.validate().map_err(|e| AppError::ValidationError(e.to_string()))?;
+    let comment = state.community_service.update_comment(id, auth_user.id, &auth_user.role, payload).await?;
+    Ok(Json(comment))
+}
+
+#[utoipa::path(
+    delete,
+    path = "/api/v1/comments/{id}",
+    params(
+        ("id" = Uuid, Path, description = "Comment ID")
+    ),
+    responses(
+        (status = 204, description = "Comment deleted")
+    ),
+    tag = "Community",
+    security(
+        ("bearerAuth" = [])
+    )
+)]
+pub async fn delete_comment(
+    State(state): State<SharedState>,
+    auth_user: AuthUser,
+    Path(id): Path<Uuid>,
+) -> Result<StatusCode, AppError> {
+    state.community_service.delete_comment(id, auth_user.id, &auth_user.role).await?;
+    Ok(StatusCode::NO_CONTENT)
 }

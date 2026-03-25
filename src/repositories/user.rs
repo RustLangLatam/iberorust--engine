@@ -1,6 +1,6 @@
-use crate::entities::{certification, thread, user as UserEntity};
+use crate::entities::{certification, course, post, thread, user as UserEntity};
 use crate::error::AppError;
-use crate::models::user::{CreateUser, UpdateUser, User, UserStats};
+use crate::models::user::{AdminStats, CreateUser, UpdateUser, User, UserRoleUpdate, UserStats};
 use async_trait::async_trait;
 #[cfg(test)]
 use mockall::automock;
@@ -16,6 +16,12 @@ pub trait UserRepository: Send + Sync {
     async fn create_user(&self, user: CreateUser, is_guest: bool) -> Result<User, AppError>;
     async fn update_user(&self, id: Uuid, update: UpdateUser) -> Result<User, AppError>;
     async fn get_user_stats(&self, user_id: Uuid) -> Result<UserStats, AppError>;
+
+    async fn list_users(&self) -> Result<Vec<User>, AppError>;
+    async fn update_user_role(&self, id: Uuid, update: UserRoleUpdate) -> Result<User, AppError>;
+    async fn delete_user(&self, id: Uuid) -> Result<(), AppError>;
+
+    async fn get_admin_stats(&self) -> Result<AdminStats, AppError>;
 }
 
 pub struct UserRepositoryImpl {
@@ -33,6 +39,7 @@ impl From<UserEntity::Model> for User {
             avatar_url: model.avatar_url,
             preferred_language: model.preferred_language,
             theme: model.theme,
+            role: model.role,
             created_at: model.created_at,
             updated_at: model.updated_at,
         }
@@ -108,6 +115,58 @@ impl UserRepository for UserRepositoryImpl {
         Ok(UserStats {
             completed_courses: completed_courses as i64,
             community_contributions: community_contributions as i64,
+        })
+    }
+
+    async fn list_users(&self) -> Result<Vec<User>, AppError> {
+        let users = UserEntity::Entity::find()
+            .order_by_desc(UserEntity::Column::CreatedAt)
+            .all(&self.db)
+            .await?;
+
+        Ok(users.into_iter().map(User::from).collect())
+    }
+
+    async fn update_user_role(&self, id: Uuid, update: UserRoleUpdate) -> Result<User, AppError> {
+        let mut user: UserEntity::ActiveModel = UserEntity::Entity::find_by_id(id)
+            .one(&self.db)
+            .await?
+            .ok_or_else(|| AppError::NotFound("User not found".to_string()))?
+            .into();
+
+        user.role = Set(update.role);
+        user.updated_at = Set(Utc::now());
+
+        let updated_user = user.update(&self.db).await?;
+        Ok(User::from(updated_user))
+    }
+
+    async fn delete_user(&self, id: Uuid) -> Result<(), AppError> {
+        let result = UserEntity::Entity::delete_by_id(id).exec(&self.db).await?;
+        if result.rows_affected == 0 {
+            return Err(AppError::NotFound("User not found".to_string()));
+        }
+        Ok(())
+    }
+
+    async fn get_admin_stats(&self) -> Result<AdminStats, AppError> {
+        let total_users = UserEntity::Entity::find().count(&self.db).await?;
+
+        let active_students = UserEntity::Entity::find()
+            .filter(UserEntity::Column::IsGuest.eq(false))
+            .count(&self.db)
+            .await?;
+
+        let total_courses = course::Entity::find().count(&self.db).await?;
+        let total_posts = post::Entity::find().count(&self.db).await?;
+        let total_threads = thread::Entity::find().count(&self.db).await?;
+
+        Ok(AdminStats {
+            total_users: total_users as i64,
+            active_students: active_students as i64,
+            total_courses: total_courses as i64,
+            total_posts: total_posts as i64,
+            total_threads: total_threads as i64,
         })
     }
 }

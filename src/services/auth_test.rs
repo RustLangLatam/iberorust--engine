@@ -28,6 +28,7 @@ async fn test_login_guest_creates_new_user_and_returns_jwt() {
                 avatar_url: None,
                 preferred_language: Some("EN".to_string()),
                 theme: Some("system".to_string()),
+                role: "USER".to_string(),
                 created_at: Utc::now(),
                 updated_at: Utc::now(),
             })

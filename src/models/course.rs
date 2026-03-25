@@ -75,3 +75,17 @@ pub struct ChapterSummary {
     pub is_quiz: Option<bool>,
     pub order: i32,
 }
+
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct CreateCourse {
+    pub title: String,
+    pub description: Option<String>,
+    pub level: Option<String>,
+}
+
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct UpdateCourse {
+    pub title: Option<String>,
+    pub description: Option<String>,
+    pub level: Option<String>,
+}

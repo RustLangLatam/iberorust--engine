@@ -5,6 +5,7 @@ use crate::repositories::{
     notification::NotificationRepository,
     post::PostRepository,
     progress::ProgressRepository,
+    reference::ReferenceRepository,
     user::UserRepository,
 };
 use crate::services::auth::AuthService;
@@ -38,6 +39,7 @@ pub struct AppState {
     pub notification_repo: Arc<dyn NotificationRepository>,
     pub post_repo: Arc<dyn PostRepository>,
     pub contact_repo: Arc<dyn ContactRepository>,
+    pub reference_repo: Arc<dyn ReferenceRepository>,
 
     // Services
     pub auth_service: Arc<AuthService>,
@@ -48,6 +50,7 @@ pub struct AppState {
     pub post_service: Arc<crate::services::post::PostService>,
     pub user_service: Arc<crate::services::user::UserService>,
     pub contact_service: Arc<crate::services::contact::ContactService>,
+    pub reference_service: Arc<crate::services::reference::ReferenceService>,
 }
 
 pub type SharedState = Arc<AppState>;

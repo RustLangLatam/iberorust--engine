@@ -55,7 +55,19 @@ use utoipa_swagger_ui::SwaggerUi;
         handlers::post::get_post,
         handlers::ai::tts_proxy,
         handlers::ai::image_edit_proxy,
+        handlers::ai::chat_proxy,
         handlers::contact::submit_inquiry,
+        handlers::user::list_users,
+        handlers::user::update_user_role,
+        handlers::user::delete_user,
+        handlers::user::get_admin_stats,
+        handlers::community::update_comment,
+        handlers::community::delete_comment,
+        handlers::reference::list_references,
+        handlers::reference::create_reference,
+        handlers::reference::update_reference,
+        handlers::reference::delete_reference,
+        handlers::upload::upload_image,
     ),
     components(
         schemas(
@@ -63,6 +75,8 @@ use utoipa_swagger_ui::SwaggerUi;
             models::user::CreateUser,
             models::user::UpdateUser,
             models::user::UserStats,
+            models::user::UserRoleUpdate,
+            models::user::AdminStats,
             models::course::Course,
             models::course::Module,
             models::course::Chapter,
@@ -78,11 +92,15 @@ use utoipa_swagger_ui::SwaggerUi;
             models::community::CreateThreadRequest,
             models::community::UpdateThreadRequest,
             models::community::CreateCommentRequest,
+            models::community::UpdateComment,
             models::community::ThreadWithComments,
             models::notification::Notification,
             models::notification::CreateNotification,
             models::post::Post,
             models::post::PostSummary,
+            models::reference::Reference,
+            models::reference::CreateReference,
+            models::reference::UpdateReference,
             models::contact::Inquiry,
             models::contact::SubmitInquiryRequest,
             handlers::auth::GoogleLoginRequest,
@@ -93,6 +111,9 @@ use utoipa_swagger_ui::SwaggerUi;
             handlers::ai::TtsResponse,
             handlers::ai::ImageEditRequest,
             handlers::ai::ImageEditResponse,
+            handlers::ai::ChatRequest,
+            handlers::ai::ChatResponse,
+            handlers::upload::UploadResponse,
         )
     ),
     tags(
@@ -105,7 +126,9 @@ use utoipa_swagger_ui::SwaggerUi;
         (name = "Posts", description = "Blog Posts Endpoints"),
         (name = "Sandbox", description = "WASM Execution Sandbox Endpoints"),
         (name = "AI", description = "AI Integration Proxies"),
-        (name = "Contact", description = "Contact Forms and Inquiries")
+        (name = "Contact", description = "Contact Forms and Inquiries"),
+        (name = "References", description = "References Endpoints"),
+        (name = "Uploads", description = "File Uploads Endpoints")
     ),
 )]
 pub struct ApiDoc;
@@ -149,8 +172,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let notification_repo = Arc::new(repositories::notification::NotificationRepositoryImpl { db: db.clone() });
     let post_repo = Arc::new(repositories::post::PostRepositoryImpl { db: db.clone() });
     let contact_repo = Arc::new(repositories::contact::ContactRepositoryImpl { db: db.clone() });
-
-    let contact_repo = Arc::new(repositories::contact::ContactRepositoryImpl { db: db.clone() });
+    let reference_repo = Arc::new(repositories::reference::ReferenceRepositoryImpl { db: db.clone() });
 
     let auth_service = Arc::new(services::auth::AuthService::new(user_repo.clone()));
     let user_service = Arc::new(services::user::UserService::new(user_repo.clone()));
@@ -167,6 +189,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let notification_service = Arc::new(services::notification::NotificationService::new(notification_repo.clone()));
     let post_service = Arc::new(services::post::PostService::new(post_repo.clone()));
     let contact_service = Arc::new(services::contact::ContactService::new(contact_repo.clone()));
+    let reference_service = Arc::new(services::reference::ReferenceService::new(reference_repo.clone()));
 
     let state: SharedState = Arc::new(AppState {
         sse_sender,
@@ -177,6 +200,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         notification_repo,
         post_repo,
         contact_repo,
+        reference_repo,
         auth_service,
         user_service,
         course_service,
@@ -185,6 +209,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         notification_service,
         post_service,
         contact_service,
+        reference_service,
     });
 
     let cors = CorsLayer::new()
@@ -197,13 +222,25 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .route("/guest", post(handlers::auth::guest_login));
 
     let user_routes = Router::new()
+        .route("/", get(handlers::user::list_users))
         .route("/me", get(handlers::user::get_me))
         .route("/me", put(handlers::user::update_me))
-        .route("/:id/stats", get(handlers::user::get_stats));
+        .route("/:id/stats", get(handlers::user::get_stats))
+        .route("/:id/role", put(handlers::user::update_user_role))
+        .route("/:id", delete(handlers::user::delete_user));
+
+    let admin_routes = Router::new()
+        .route("/stats", get(handlers::user::get_admin_stats));
+
+    let upload_routes = Router::new()
+        .route("/image", post(handlers::upload::upload_image));
 
     let course_routes = Router::new()
         .route("/", get(handlers::course::list_courses))
+        .route("/", post(handlers::course::create_course))
         .route("/:id", get(handlers::course::get_course))
+        .route("/:id", put(handlers::course::update_course))
+        .route("/:id", delete(handlers::course::delete_course))
         .route("/:course_id/chapters/:chapter_id", get(handlers::course::get_chapter));
 
     let progress_routes = Router::new()
@@ -224,7 +261,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .route("/:id/like", post(handlers::community::toggle_like_thread));
 
     let comments_routes = Router::new()
-        .route("/:id/like", post(handlers::community::toggle_like_comment));
+        .route("/:id/like", post(handlers::community::toggle_like_comment))
+        .route("/:id", put(handlers::community::update_comment))
+        .route("/:id", delete(handlers::community::delete_comment));
 
     let notification_routes = Router::new()
         .route("/", get(handlers::notification::list_notifications))
@@ -239,14 +278,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let post_routes = Router::new()
         .route("/", get(handlers::post::list_posts))
-        .route("/:id", get(handlers::post::get_post));
+        .route("/", post(handlers::post::create_post))
+        .route("/:id", get(handlers::post::get_post))
+        .route("/:id", put(handlers::post::update_post))
+        .route("/:id", delete(handlers::post::delete_post));
 
     let ai_routes = Router::new()
         .route("/tts", post(handlers::ai::tts_proxy))
-        .route("/image-edit", post(handlers::ai::image_edit_proxy));
+        .route("/image-edit", post(handlers::ai::image_edit_proxy))
+        .route("/chat", post(handlers::ai::chat_proxy));
 
     let contact_routes = Router::new()
         .route("/inquiry", post(handlers::contact::submit_inquiry));
+
+    let reference_routes = Router::new()
+        .route("/", get(handlers::reference::list_references))
+        .route("/", post(handlers::reference::create_reference))
+        .route("/:id", put(handlers::reference::update_reference))
+        .route("/:id", delete(handlers::reference::delete_reference));
 
     let api_routes = Router::new()
         .nest("/auth", auth_routes)
@@ -261,7 +310,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .nest("/sandbox", sandbox_routes)
         .nest("/posts", post_routes)
         .nest("/ai", ai_routes)
-        .nest("/contact", contact_routes);
+        .nest("/contact", contact_routes)
+        .nest("/references", reference_routes)
+        .nest("/admin", admin_routes)
+        .nest("/uploads", upload_routes);
 
     let app = Router::new()
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))

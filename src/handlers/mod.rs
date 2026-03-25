@@ -8,3 +8,5 @@ pub mod sandbox;
 pub mod post;
 pub mod ai;
 pub mod contact;
+pub mod reference;
+pub mod upload;

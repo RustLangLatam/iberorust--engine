@@ -9,10 +9,7 @@ pub mod state;
 pub mod entities;
 
 use crate::state::{AppState, SharedState};
-use axum::{
-    routing::{delete, get, post, put},
-    Router,
-};
+use axum::Router;
 use sea_orm::{ConnectOptions, Database};
 use std::sync::Arc;
 use tokio::sync::broadcast;
@@ -302,109 +299,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .allow_methods(Any)
         .allow_headers(Any);
 
-    let auth_routes = Router::new()
-        .route("/google", post(handlers::auth::google_login))
-        .route("/guest", post(handlers::auth::guest_login));
-
-    let user_routes = Router::new()
-        .route("/", get(handlers::user::list_users))
-        .route("/me", get(handlers::user::get_me))
-        .route("/me", put(handlers::user::update_me))
-        .route("/{id}/stats", get(handlers::user::get_stats))
-        .route("/{id}/role", put(handlers::user::update_user_role))
-        .route("/{id}", delete(handlers::user::delete_user));
-
-    let admin_routes = Router::new()
-        .route("/stats", get(handlers::user::get_admin_stats));
-
-    let upload_routes = Router::new()
-        .route("/image", post(handlers::upload::upload_image));
-
-    let course_routes = Router::new()
-        .route("/", get(handlers::course::list_courses))
-        .route("/", post(handlers::course::create_course))
-        .route("/{id}", get(handlers::course::get_course))
-        .route("/{id}", put(handlers::course::update_course))
-        .route("/{id}", delete(handlers::course::delete_course))
-        .route("/{course_id}/modules", post(handlers::course::create_module))
-        .route("/{course_id}/modules/{module_id}", put(handlers::course::update_module))
-        .route("/{course_id}/modules/{module_id}", delete(handlers::course::delete_module))
-        .route("/{course_id}/modules/{module_id}/chapters", post(handlers::course::create_chapter))
-        .route("/{course_id}/modules/{module_id}/chapters/{chapter_id}", put(handlers::course::update_chapter))
-        .route("/{course_id}/modules/{module_id}/chapters/{chapter_id}", delete(handlers::course::delete_chapter))
-        .route("/{course_id}/chapters/{chapter_id}", get(handlers::course::get_chapter));
-
-    let progress_routes = Router::new()
-        .route("/", get(handlers::progress::get_progress))
-        .route("/chapters/{chapter_id}", post(handlers::progress::save_chapter_progress));
-
-    let cert_routes = Router::new()
-        .route("/", get(handlers::progress::get_certifications))
-        .route("/generate/{course_id}", post(handlers::progress::generate_cert));
-
-    let community_routes = Router::new()
-        .route("/", get(handlers::community::list_threads))
-        .route("/", post(handlers::community::create_thread))
-        .route("/{id}", get(handlers::community::get_thread))
-        .route("/{id}", put(handlers::community::update_thread))
-        .route("/{id}", delete(handlers::community::delete_thread))
-        .route("/{id}/comments", post(handlers::community::add_thread_comment))
-        .route("/{id}/like", post(handlers::community::toggle_like_thread));
-
-    let comments_routes = Router::new()
-        .route("/{id}/like", post(handlers::community::toggle_like_comment))
-        .route("/{id}", put(handlers::community::update_comment))
-        .route("/{id}", delete(handlers::community::delete_comment));
-
-    let notification_routes = Router::new()
-        .route("/", get(handlers::notification::list_notifications))
-        .route("/{id}/read", put(handlers::notification::mark_as_read))
-        .route("/read-all", put(handlers::notification::mark_all_as_read));
-
-    let stream_routes = Router::new()
-        .route("/notifications", get(handlers::notification::sse_stream));
-
-    let sandbox_routes = Router::new()
-        .route("/execute", post(handlers::sandbox::execute_code));
-
-    let post_routes = Router::new()
-        .route("/", get(handlers::post::list_posts))
-        .route("/", post(handlers::post::create_post))
-        .route("/{id}", get(handlers::post::get_post))
-        .route("/{id}", put(handlers::post::update_post))
-        .route("/{id}", delete(handlers::post::delete_post));
-
-    let ai_routes = Router::new()
-        .route("/tts", post(handlers::ai::tts_proxy))
-        .route("/image-edit", post(handlers::ai::image_edit_proxy))
-        .route("/chat", post(handlers::ai::chat_proxy));
-
-    let contact_routes = Router::new()
-        .route("/inquiry", post(handlers::contact::submit_inquiry));
-
-    let reference_routes = Router::new()
-        .route("/", get(handlers::reference::list_references))
-        .route("/", post(handlers::reference::create_reference))
-        .route("/{id}", put(handlers::reference::update_reference))
-        .route("/{id}", delete(handlers::reference::delete_reference));
-
-    let api_routes = Router::new()
-        .nest("/auth", auth_routes)
-        .nest("/users", user_routes)
-        .nest("/courses", course_routes)
-        .nest("/progress", progress_routes)
-        .nest("/certifications", cert_routes)
-        .nest("/threads", community_routes)
-        .nest("/comments", comments_routes)
-        .nest("/notifications", notification_routes)
-        .nest("/stream", stream_routes)
-        .nest("/sandbox", sandbox_routes)
-        .nest("/posts", post_routes)
-        .nest("/ai", ai_routes)
-        .nest("/contact", contact_routes)
-        .nest("/references", reference_routes)
-        .nest("/admin", admin_routes)
-        .nest("/uploads", upload_routes);
+    let api_routes = handlers::api_router();
 
     let app = Router::new()
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))

@@ -1,8 +1,13 @@
 use crate::error::AppError;
 use crate::models::contact::{Inquiry, SubmitInquiryRequest};
 use crate::state::SharedState;
-use axum::{extract::State, http::StatusCode, Json};
+use axum::{extract::State, routing::post, http::StatusCode, Json, Router};
 use validator::Validate;
+
+pub fn routes() -> Router<crate::state::SharedState> {
+    Router::new()
+        .route("/inquiry", post(submit_inquiry))
+}
 
 #[utoipa::path(
     post,

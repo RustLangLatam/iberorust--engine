@@ -3,6 +3,12 @@ use crate::middlewares::auth::AuthUser;
 use axum::{Json, extract::Multipart};
 use serde::Serialize;
 use utoipa::ToSchema;
+use axum::{routing::post, Router};
+
+pub fn routes() -> Router<crate::state::SharedState> {
+    Router::new()
+        .route("/image", post(upload_image))
+}
 
 #[derive(Debug, Serialize, ToSchema)]
 pub struct UploadResponse {

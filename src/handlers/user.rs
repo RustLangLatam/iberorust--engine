@@ -9,6 +9,21 @@ use axum::{
 use crate::models::common::PaginationAndFilters;
 use uuid::Uuid;
 use validator::Validate;
+use axum::{routing::{get, put, delete}, Router};
+
+pub fn routes() -> Router<crate::state::SharedState> {
+    Router::new()
+        .route("/", get(list_users))
+        .route("/me", get(get_me).put(update_me))
+        .route("/{id}/stats", get(get_stats))
+        .route("/{id}/role", put(update_user_role))
+        .route("/{id}", delete(delete_user))
+}
+
+pub fn admin_routes() -> Router<crate::state::SharedState> {
+    Router::new()
+        .route("/stats", get(get_admin_stats))
+}
 
 #[utoipa::path(
     get,

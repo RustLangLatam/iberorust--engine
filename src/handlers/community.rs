@@ -11,6 +11,21 @@ use axum::{
 };
 use crate::models::common::PaginationAndFilters;
 use uuid::Uuid;
+use axum::{routing::{get, post, put, delete}, Router};
+
+pub fn thread_routes() -> Router<crate::state::SharedState> {
+    Router::new()
+        .route("/", get(list_threads).post(create_thread))
+        .route("/{id}", get(get_thread).put(update_thread).delete(delete_thread))
+        .route("/{id}/comments", post(add_thread_comment))
+        .route("/{id}/like", post(toggle_like_thread))
+}
+
+pub fn comment_routes() -> Router<crate::state::SharedState> {
+    Router::new()
+        .route("/{id}/like", post(toggle_like_comment))
+        .route("/{id}", put(update_comment).delete(delete_comment))
+}
 
 #[utoipa::path(
     get,

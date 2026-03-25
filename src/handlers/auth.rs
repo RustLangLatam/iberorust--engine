@@ -1,8 +1,14 @@
 use crate::error::AppError;
 use crate::state::SharedState;
-use axum::{extract::State, Json};
+use axum::{extract::State, routing::post, Json, Router};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
+
+pub fn routes() -> Router<crate::state::SharedState> {
+    Router::new()
+        .route("/google", post(google_login))
+        .route("/guest", post(guest_login))
+}
 use validator::Validate;
 
 #[derive(Deserialize, Validate, ToSchema)]

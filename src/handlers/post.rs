@@ -7,6 +7,13 @@ use axum::{
 };
 use crate::models::common::PaginationAndFilters;
 use uuid::Uuid;
+use axum::{routing::{get, post, put, delete}, Router};
+
+pub fn routes() -> Router<crate::state::SharedState> {
+    Router::new()
+        .route("/", get(list_posts).post(create_post))
+        .route("/{id}", get(get_post).put(update_post).delete(delete_post))
+}
 
 #[utoipa::path(
     get,

@@ -7,6 +7,18 @@ use axum::{
 };
 use crate::models::common::PaginationAndFilters;
 use uuid::Uuid;
+use axum::{routing::{get, post, put, delete}, Router};
+
+pub fn routes() -> Router<crate::state::SharedState> {
+    Router::new()
+        .route("/", get(list_courses).post(create_course))
+        .route("/{id}", get(get_course).put(update_course).delete(delete_course))
+        .route("/{course_id}/modules", post(create_module))
+        .route("/{course_id}/modules/{module_id}", put(update_module).delete(delete_module))
+        .route("/{course_id}/modules/{module_id}/chapters", post(create_chapter))
+        .route("/{course_id}/modules/{module_id}/chapters/{chapter_id}", put(update_chapter).delete(delete_chapter))
+        .route("/{course_id}/chapters/{chapter_id}", get(get_chapter))
+}
 
 #[utoipa::path(
     get,

@@ -60,6 +60,12 @@ pub struct CreateCommentRequest {
     pub content: String,
 }
 
+#[derive(Debug, Deserialize, Validate, ToSchema)]
+pub struct UpdateComment {
+    #[validate(length(min = 1, message = "Content cannot be empty"))]
+    pub content: String,
+}
+
 #[derive(Debug, Serialize, ToSchema)]
 pub struct ThreadWithComments {
     #[serde(flatten)]

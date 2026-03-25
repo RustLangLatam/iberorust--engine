@@ -1,11 +1,12 @@
 use crate::entities::{chapter, course, module};
 use crate::error::AppError;
-use crate::models::course::{Chapter, ChapterSummary, Course, Module};
+use crate::models::course::{Chapter, ChapterSummary, Course, CreateCourse, Module, UpdateCourse};
 use async_trait::async_trait;
 #[cfg(test)]
 use mockall::automock;
 use sea_orm::*;
 use uuid::Uuid;
+use chrono::Utc;
 
 #[cfg_attr(test, automock)]
 #[async_trait]
@@ -16,6 +17,10 @@ pub trait CourseRepository: Send + Sync {
     async fn get_chapters_summary_for_module(&self, module_id: Uuid) -> Result<Vec<ChapterSummary>, AppError>;
     async fn get_chapter(&self, course_id: Uuid, chapter_id: Uuid) -> Result<Option<Chapter>, AppError>;
     async fn get_chapter_by_id(&self, chapter_id: Uuid) -> Result<Option<Chapter>, AppError>;
+
+    async fn create_course(&self, req: CreateCourse) -> Result<Course, AppError>;
+    async fn update_course(&self, course_id: Uuid, req: UpdateCourse) -> Result<Course, AppError>;
+    async fn delete_course(&self, course_id: Uuid) -> Result<(), AppError>;
 }
 
 pub struct CourseRepositoryImpl {
@@ -140,5 +145,50 @@ impl CourseRepository for CourseRepositoryImpl {
             .await?;
 
         Ok(ch.map(Chapter::from))
+    }
+
+    async fn create_course(&self, req: CreateCourse) -> Result<Course, AppError> {
+        let new_course = course::ActiveModel {
+            id: Set(Uuid::new_v4()),
+            title: Set(req.title),
+            description: Set(req.description),
+            level: Set(req.level),
+            created_at: Set(Utc::now()),
+            updated_at: Set(Utc::now()),
+            ..Default::default()
+        };
+
+        let result = course::Entity::insert(new_course).exec_with_returning(&self.db).await?;
+        Ok(Course::from(result))
+    }
+
+    async fn update_course(&self, course_id: Uuid, req: UpdateCourse) -> Result<Course, AppError> {
+        let mut c: course::ActiveModel = course::Entity::find_by_id(course_id)
+            .one(&self.db)
+            .await?
+            .ok_or_else(|| AppError::NotFound("Course not found".to_string()))?
+            .into();
+
+        if let Some(title) = req.title {
+            c.title = Set(title);
+        }
+        if let Some(desc) = req.description {
+            c.description = Set(Some(desc));
+        }
+        if let Some(level) = req.level {
+            c.level = Set(Some(level));
+        }
+        c.updated_at = Set(Utc::now());
+
+        let result = c.update(&self.db).await?;
+        Ok(Course::from(result))
+    }
+
+    async fn delete_course(&self, course_id: Uuid) -> Result<(), AppError> {
+        let result = course::Entity::delete_by_id(course_id).exec(&self.db).await?;
+        if result.rows_affected == 0 {
+            return Err(AppError::NotFound("Course not found".to_string()));
+        }
+        Ok(())
     }
 }

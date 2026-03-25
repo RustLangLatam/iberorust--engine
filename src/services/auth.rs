@@ -12,6 +12,7 @@ pub struct Claims {
     pub sub: Uuid,
     pub email: String,
     pub is_guest: bool,
+    pub role: String,
     pub exp: usize,
 }
 
@@ -25,14 +26,15 @@ pub struct GoogleTokenInfo {
 
 pub struct AuthService {
     user_repo: Arc<dyn UserRepository>,
+    jwt_secret: String,
 }
 
 impl AuthService {
-    pub fn new(user_repo: Arc<dyn UserRepository>) -> Self {
-        Self { user_repo }
+    pub fn new(user_repo: Arc<dyn UserRepository>, jwt_secret: String) -> Self {
+        Self { user_repo, jwt_secret }
     }
 
-    pub fn generate_jwt(&self, user_id: Uuid, email: &str, is_guest: bool) -> Result<String, AppError> {
+    pub fn generate_jwt(&self, user_id: Uuid, email: &str, is_guest: bool, role: &str) -> Result<String, AppError> {
         let expiration = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .map_err(|_| AppError::InternalServerError(anyhow::anyhow!("Time went backwards")))?
@@ -43,17 +45,14 @@ impl AuthService {
             sub: user_id,
             email: email.to_string(),
             is_guest,
+            role: role.to_string(),
             exp: expiration,
         };
-
-        let secret = std::env::var("JWT_SECRET").map_err(|_| {
-            AppError::InternalServerError(anyhow::anyhow!("JWT_SECRET not set in environment"))
-        })?;
 
         encode(
             &Header::default(),
             &claims,
-            &EncodingKey::from_secret(secret.as_bytes()),
+            &EncodingKey::from_secret(self.jwt_secret.as_bytes()),
         )
         .map_err(|e| AppError::InternalServerError(anyhow::anyhow!("JWT encoding error: {}", e)))
     }
@@ -90,7 +89,7 @@ impl AuthService {
             None => self.user_repo.create_user(google_user, false).await?,
         };
 
-        self.generate_jwt(user.id, &user.email, user.is_guest)
+        self.generate_jwt(user.id, &user.email, user.is_guest, &user.role)
     }
 
     pub async fn login_guest(&self) -> Result<String, AppError> {
@@ -106,6 +105,6 @@ impl AuthService {
 
         let user = self.user_repo.create_user(create_req, true).await?;
 
-        self.generate_jwt(user.id, &user.email, user.is_guest)
+        self.generate_jwt(user.id, &user.email, user.is_guest, &user.role)
     }
 }

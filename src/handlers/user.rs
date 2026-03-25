@@ -1,6 +1,6 @@
 use crate::error::AppError;
-use crate::middlewares::auth::AuthUser;
-use crate::models::user::{UpdateUser, User, UserStats};
+use crate::middlewares::auth::{AdminUser, AuthUser};
+use crate::models::user::{AdminStats, UpdateUser, User, UserRoleUpdate, UserStats};
 use crate::state::SharedState;
 use axum::{
     extract::{Path, State},
@@ -70,5 +70,92 @@ pub async fn get_stats(
 ) -> Result<Json<UserStats>, AppError> {
     let stats = state.user_service.get_user_stats(id).await?;
 
+    Ok(Json(stats))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/v1/users",
+    responses(
+        (status = 200, description = "List of users", body = Vec<User>)
+    ),
+    security(
+        ("bearerAuth" = [])
+    ),
+    tag = "Users"
+)]
+pub async fn list_users(
+    State(state): State<SharedState>,
+    _admin: AdminUser,
+) -> Result<Json<Vec<User>>, AppError> {
+    let users = state.user_service.list_users().await?;
+    Ok(Json(users))
+}
+
+#[utoipa::path(
+    put,
+    path = "/api/v1/users/{id}/role",
+    params(
+        ("id" = Uuid, Path, description = "User ID")
+    ),
+    request_body = UserRoleUpdate,
+    responses(
+        (status = 200, description = "User role updated", body = User)
+    ),
+    security(
+        ("bearerAuth" = [])
+    ),
+    tag = "Users"
+)]
+pub async fn update_user_role(
+    State(state): State<SharedState>,
+    Path(id): Path<Uuid>,
+    _admin: AdminUser,
+    Json(payload): Json<UserRoleUpdate>,
+) -> Result<Json<User>, AppError> {
+    payload.validate().map_err(|e| AppError::ValidationError(e.to_string()))?;
+    let user = state.user_service.update_user_role(id, payload).await?;
+    Ok(Json(user))
+}
+
+#[utoipa::path(
+    delete,
+    path = "/api/v1/users/{id}",
+    params(
+        ("id" = Uuid, Path, description = "User ID")
+    ),
+    responses(
+        (status = 204, description = "User deleted")
+    ),
+    security(
+        ("bearerAuth" = [])
+    ),
+    tag = "Users"
+)]
+pub async fn delete_user(
+    State(state): State<SharedState>,
+    Path(id): Path<Uuid>,
+    _admin: AdminUser,
+) -> Result<axum::http::StatusCode, AppError> {
+    state.user_service.delete_user(id).await?;
+    Ok(axum::http::StatusCode::NO_CONTENT)
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/v1/admin/stats",
+    responses(
+        (status = 200, description = "Global Admin Stats", body = AdminStats)
+    ),
+    security(
+        ("bearerAuth" = [])
+    ),
+    tag = "Users"
+)]
+pub async fn get_admin_stats(
+    State(state): State<SharedState>,
+    _admin: AdminUser,
+) -> Result<Json<AdminStats>, AppError> {
+    let stats = state.user_service.get_admin_stats().await?;
     Ok(Json(stats))
 }

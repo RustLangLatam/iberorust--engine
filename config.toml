@@ -1,0 +1,18 @@
+[server]
+port = 3000
+host = "0.0.0.0"
+
+[database]
+url = "postgres://postgres:postgres@localhost:5432/rustedu"
+max_connections = 5
+min_connections = 1
+connect_timeout = 8
+idle_timeout = 8
+max_lifetime = 8
+sqlx_logging = true
+
+[logging]
+level = "app=debug,tower_http=debug"
+
+[auth]
+jwt_secret = "your_super_secret_jwt_key_here"

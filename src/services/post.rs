@@ -1,5 +1,5 @@
 use crate::error::AppError;
-use crate::models::post::{Post, PostSummary};
+use crate::models::post::{CreatePost, Post, PostSummary, UpdatePost};
 use crate::repositories::post::PostRepository;
 use std::sync::Arc;
 use uuid::Uuid;
@@ -25,5 +25,17 @@ impl PostService {
             .ok_or_else(|| AppError::NotFound("Post not found".to_string()))?;
 
         Ok(post)
+    }
+
+    pub async fn create_post(&self, author_id: Uuid, req: CreatePost) -> Result<Post, AppError> {
+        self.post_repo.create_post(author_id, req).await
+    }
+
+    pub async fn update_post(&self, id: Uuid, req: UpdatePost) -> Result<Post, AppError> {
+        self.post_repo.update_post(id, req).await
+    }
+
+    pub async fn delete_post(&self, id: Uuid) -> Result<(), AppError> {
+        self.post_repo.delete_post(id).await
     }
 }

@@ -1,5 +1,5 @@
 use crate::error::AppError;
-use crate::models::course::{Chapter, Course, CourseDetails, ModuleDetails};
+use crate::models::course::{Chapter, Course, CourseDetails, CreateCourse, ModuleDetails, UpdateCourse};
 use crate::repositories::course::CourseRepository;
 use std::sync::Arc;
 use uuid::Uuid;
@@ -62,5 +62,17 @@ impl CourseService {
             .ok_or_else(|| AppError::NotFound("Chapter not found for this course".to_string()))?;
 
         Ok(chapter)
+    }
+
+    pub async fn create_course(&self, req: CreateCourse) -> Result<Course, AppError> {
+        self.course_repo.create_course(req).await
+    }
+
+    pub async fn update_course(&self, course_id: Uuid, req: UpdateCourse) -> Result<Course, AppError> {
+        self.course_repo.update_course(course_id, req).await
+    }
+
+    pub async fn delete_course(&self, course_id: Uuid) -> Result<(), AppError> {
+        self.course_repo.delete_course(course_id).await
     }
 }

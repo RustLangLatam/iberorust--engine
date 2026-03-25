@@ -6,6 +6,7 @@ use jsonwebtoken::{decode, DecodingKey, Validation};
 pub struct AuthUser {
     pub id: uuid::Uuid,
     pub is_guest: bool,
+    pub role: String,
 }
 
 impl<S> FromRequestParts<S> for AuthUser
@@ -39,6 +40,41 @@ where
         Ok(AuthUser {
             id: token_data.claims.sub,
             is_guest: token_data.claims.is_guest,
+            role: token_data.claims.role,
         })
+    }
+}
+
+pub struct AdminUser(pub AuthUser);
+
+impl<S> FromRequestParts<S> for AdminUser
+where
+    S: Send + Sync,
+{
+    type Rejection = AppError;
+
+    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+        let user = AuthUser::from_request_parts(parts, state).await?;
+        if user.role != "ADMIN" {
+            return Err(AppError::Forbidden("Requires ADMIN role".to_string()));
+        }
+        Ok(AdminUser(user))
+    }
+}
+
+pub struct ModeratorUser(pub AuthUser);
+
+impl<S> FromRequestParts<S> for ModeratorUser
+where
+    S: Send + Sync,
+{
+    type Rejection = AppError;
+
+    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+        let user = AuthUser::from_request_parts(parts, state).await?;
+        if user.role != "ADMIN" && user.role != "MODERATOR" {
+            return Err(AppError::Forbidden("Requires MODERATOR or ADMIN role".to_string()));
+        }
+        Ok(ModeratorUser(user))
     }
 }

@@ -1,6 +1,6 @@
 use crate::error::AppError;
 use crate::models::community::{
-    Comment, CreateCommentRequest, CreateThreadRequest, Thread, ThreadWithComments, UpdateThreadRequest,
+    Comment, CreateCommentRequest, CreateThreadRequest, Thread, ThreadWithComments, UpdateComment, UpdateThreadRequest,
 };
 use crate::repositories::community::CommunityRepository;
 use crate::state::{NotificationEvent, NotificationMessage};
@@ -147,5 +147,38 @@ impl CommunityService {
         user_id: Uuid,
     ) -> Result<(), AppError> {
         self.community_repo.toggle_comment_like(comment_id, user_id).await
+    }
+
+    pub async fn update_comment(
+        &self,
+        comment_id: Uuid,
+        user_id: Uuid,
+        role: &str,
+        req: UpdateComment,
+    ) -> Result<Comment, AppError> {
+        let comment = self.community_repo.get_comment(comment_id).await?
+            .ok_or_else(|| AppError::NotFound("Comment not found".to_string()))?;
+
+        if comment.author_id != user_id && role != "MODERATOR" && role != "ADMIN" {
+            return Err(AppError::Forbidden("Not authorized to edit this comment".to_string()));
+        }
+
+        self.community_repo.update_comment(comment_id, req).await
+    }
+
+    pub async fn delete_comment(
+        &self,
+        comment_id: Uuid,
+        user_id: Uuid,
+        role: &str,
+    ) -> Result<(), AppError> {
+        let comment = self.community_repo.get_comment(comment_id).await?
+            .ok_or_else(|| AppError::NotFound("Comment not found".to_string()))?;
+
+        if comment.author_id != user_id && role != "MODERATOR" && role != "ADMIN" {
+            return Err(AppError::Forbidden("Not authorized to delete this comment".to_string()));
+        }
+
+        self.community_repo.delete_comment(comment_id).await
     }
 }

@@ -1,17 +1,21 @@
 use crate::entities::post as PostEntity;
 use crate::error::AppError;
-use crate::models::post::{Post, PostSummary};
+use crate::models::post::{CreatePost, Post, PostSummary, UpdatePost};
 use async_trait::async_trait;
 #[cfg(test)]
 use mockall::automock;
 use sea_orm::*;
 use uuid::Uuid;
+use chrono::Utc;
 
 #[cfg_attr(test, automock)]
 #[async_trait]
 pub trait PostRepository: Send + Sync {
     async fn list_posts(&self) -> Result<Vec<PostSummary>, AppError>;
     async fn get_post(&self, post_id: Uuid) -> Result<Option<Post>, AppError>;
+    async fn create_post(&self, author_id: Uuid, req: CreatePost) -> Result<Post, AppError>;
+    async fn update_post(&self, id: Uuid, req: UpdatePost) -> Result<Post, AppError>;
+    async fn delete_post(&self, id: Uuid) -> Result<(), AppError>;
 }
 
 pub struct PostRepositoryImpl {
@@ -58,5 +62,51 @@ impl PostRepository for PostRepositoryImpl {
             .await?;
 
         Ok(post.map(Post::from))
+    }
+
+    async fn create_post(&self, author_id: Uuid, req: CreatePost) -> Result<Post, AppError> {
+        let new_post = PostEntity::ActiveModel {
+            id: Set(Uuid::new_v4()),
+            title: Set(req.title),
+            content: Set(req.content),
+            author_id: Set(Some(author_id)),
+            published_at: Set(req.published_at),
+            created_at: Set(Utc::now()),
+            updated_at: Set(Utc::now()),
+            ..Default::default()
+        };
+
+        let result = PostEntity::Entity::insert(new_post).exec_with_returning(&self.db).await?;
+        Ok(Post::from(result))
+    }
+
+    async fn update_post(&self, id: Uuid, req: UpdatePost) -> Result<Post, AppError> {
+        let mut p: PostEntity::ActiveModel = PostEntity::Entity::find_by_id(id)
+            .one(&self.db)
+            .await?
+            .ok_or_else(|| AppError::NotFound("Post not found".to_string()))?
+            .into();
+
+        if let Some(title) = req.title {
+            p.title = Set(title);
+        }
+        if let Some(content) = req.content {
+            p.content = Set(content);
+        }
+        if let Some(published_at) = req.published_at {
+            p.published_at = Set(Some(published_at));
+        }
+        p.updated_at = Set(Utc::now());
+
+        let result = p.update(&self.db).await?;
+        Ok(Post::from(result))
+    }
+
+    async fn delete_post(&self, id: Uuid) -> Result<(), AppError> {
+        let result = PostEntity::Entity::delete_by_id(id).exec(&self.db).await?;
+        if result.rows_affected == 0 {
+            return Err(AppError::NotFound("Post not found".to_string()));
+        }
+        Ok(())
     }
 }

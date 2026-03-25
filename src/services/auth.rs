@@ -12,6 +12,7 @@ pub struct Claims {
     pub sub: Uuid,
     pub email: String,
     pub is_guest: bool,
+    pub role: String,
     pub exp: usize,
 }
 
@@ -32,7 +33,7 @@ impl AuthService {
         Self { user_repo }
     }
 
-    pub fn generate_jwt(&self, user_id: Uuid, email: &str, is_guest: bool) -> Result<String, AppError> {
+    pub fn generate_jwt(&self, user_id: Uuid, email: &str, is_guest: bool, role: &str) -> Result<String, AppError> {
         let expiration = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .map_err(|_| AppError::InternalServerError(anyhow::anyhow!("Time went backwards")))?
@@ -43,6 +44,7 @@ impl AuthService {
             sub: user_id,
             email: email.to_string(),
             is_guest,
+            role: role.to_string(),
             exp: expiration,
         };
 
@@ -90,7 +92,7 @@ impl AuthService {
             None => self.user_repo.create_user(google_user, false).await?,
         };
 
-        self.generate_jwt(user.id, &user.email, user.is_guest)
+        self.generate_jwt(user.id, &user.email, user.is_guest, &user.role)
     }
 
     pub async fn login_guest(&self) -> Result<String, AppError> {
@@ -106,6 +108,6 @@ impl AuthService {
 
         let user = self.user_repo.create_user(create_req, true).await?;
 
-        self.generate_jwt(user.id, &user.email, user.is_guest)
+        self.generate_jwt(user.id, &user.email, user.is_guest, &user.role)
     }
 }

@@ -227,9 +227,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .route("/", get(handlers::user::list_users))
         .route("/me", get(handlers::user::get_me))
         .route("/me", put(handlers::user::update_me))
-        .route("/:id/stats", get(handlers::user::get_stats))
-        .route("/:id/role", put(handlers::user::update_user_role))
-        .route("/:id", delete(handlers::user::delete_user));
+        .route("/{id}/stats", get(handlers::user::get_stats))
+        .route("/{id}/role", put(handlers::user::update_user_role))
+        .route("/{id}", delete(handlers::user::delete_user));
 
     let admin_routes = Router::new()
         .route("/stats", get(handlers::user::get_admin_stats));
@@ -240,36 +240,36 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let course_routes = Router::new()
         .route("/", get(handlers::course::list_courses))
         .route("/", post(handlers::course::create_course))
-        .route("/:id", get(handlers::course::get_course))
-        .route("/:id", put(handlers::course::update_course))
-        .route("/:id", delete(handlers::course::delete_course))
-        .route("/:course_id/chapters/:chapter_id", get(handlers::course::get_chapter));
+        .route("/{id}", get(handlers::course::get_course))
+        .route("/{id}", put(handlers::course::update_course))
+        .route("/{id}", delete(handlers::course::delete_course))
+        .route("/{course_id}/chapters/{chapter_id}", get(handlers::course::get_chapter));
 
     let progress_routes = Router::new()
         .route("/", get(handlers::progress::get_progress))
-        .route("/chapters/:chapter_id", post(handlers::progress::save_chapter_progress));
+        .route("/chapters/{chapter_id}", post(handlers::progress::save_chapter_progress));
 
     let cert_routes = Router::new()
         .route("/", get(handlers::progress::get_certifications))
-        .route("/generate/:course_id", post(handlers::progress::generate_cert));
+        .route("/generate/{course_id}", post(handlers::progress::generate_cert));
 
     let community_routes = Router::new()
         .route("/", get(handlers::community::list_threads))
         .route("/", post(handlers::community::create_thread))
-        .route("/:id", get(handlers::community::get_thread))
-        .route("/:id", put(handlers::community::update_thread))
-        .route("/:id", delete(handlers::community::delete_thread))
-        .route("/:id/comments", post(handlers::community::add_thread_comment))
-        .route("/:id/like", post(handlers::community::toggle_like_thread));
+        .route("/{id}", get(handlers::community::get_thread))
+        .route("/{id}", put(handlers::community::update_thread))
+        .route("/{id}", delete(handlers::community::delete_thread))
+        .route("/{id}/comments", post(handlers::community::add_thread_comment))
+        .route("/{id}/like", post(handlers::community::toggle_like_thread));
 
     let comments_routes = Router::new()
-        .route("/:id/like", post(handlers::community::toggle_like_comment))
-        .route("/:id", put(handlers::community::update_comment))
-        .route("/:id", delete(handlers::community::delete_comment));
+        .route("/{id}/like", post(handlers::community::toggle_like_comment))
+        .route("/{id}", put(handlers::community::update_comment))
+        .route("/{id}", delete(handlers::community::delete_comment));
 
     let notification_routes = Router::new()
         .route("/", get(handlers::notification::list_notifications))
-        .route("/:id/read", put(handlers::notification::mark_as_read))
+        .route("/{id}/read", put(handlers::notification::mark_as_read))
         .route("/read-all", put(handlers::notification::mark_all_as_read));
 
     let stream_routes = Router::new()
@@ -281,9 +281,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let post_routes = Router::new()
         .route("/", get(handlers::post::list_posts))
         .route("/", post(handlers::post::create_post))
-        .route("/:id", get(handlers::post::get_post))
-        .route("/:id", put(handlers::post::update_post))
-        .route("/:id", delete(handlers::post::delete_post));
+        .route("/{id}", get(handlers::post::get_post))
+        .route("/{id}", put(handlers::post::update_post))
+        .route("/{id}", delete(handlers::post::delete_post));
 
     let ai_routes = Router::new()
         .route("/tts", post(handlers::ai::tts_proxy))
@@ -296,8 +296,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let reference_routes = Router::new()
         .route("/", get(handlers::reference::list_references))
         .route("/", post(handlers::reference::create_reference))
-        .route("/:id", put(handlers::reference::update_reference))
-        .route("/:id", delete(handlers::reference::delete_reference));
+        .route("/{id}", put(handlers::reference::update_reference))
+        .route("/{id}", delete(handlers::reference::delete_reference));
 
     let api_routes = Router::new()
         .nest("/auth", auth_routes)

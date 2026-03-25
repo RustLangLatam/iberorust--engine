@@ -41,13 +41,11 @@ impl FromRequestParts<SharedState> for AuthUser {
 
 pub struct AdminUser(pub AuthUser);
 
-impl<S> FromRequestParts<S> for AdminUser
-where
-    S: Send + Sync,
+impl FromRequestParts<SharedState> for AdminUser
 {
     type Rejection = AppError;
 
-    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+    async fn from_request_parts(parts: &mut Parts, state: &SharedState) -> Result<Self, Self::Rejection> {
         let user = AuthUser::from_request_parts(parts, state).await?;
         if user.role != "ADMIN" {
             return Err(AppError::Forbidden("Requires ADMIN role".to_string()));
@@ -58,13 +56,11 @@ where
 
 pub struct ModeratorUser(pub AuthUser);
 
-impl<S> FromRequestParts<S> for ModeratorUser
-where
-    S: Send + Sync,
+impl FromRequestParts<SharedState> for ModeratorUser
 {
     type Rejection = AppError;
 
-    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+    async fn from_request_parts(parts: &mut Parts, state: &SharedState) -> Result<Self, Self::Rejection> {
         let user = AuthUser::from_request_parts(parts, state).await?;
         if user.role != "ADMIN" && user.role != "MODERATOR" {
             return Err(AppError::Forbidden("Requires MODERATOR or ADMIN role".to_string()));

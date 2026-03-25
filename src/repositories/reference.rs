@@ -7,11 +7,12 @@ use mockall::automock;
 use sea_orm::*;
 use uuid::Uuid;
 use chrono::Utc;
+use crate::models::common::PaginationAndFilters;
 
 #[cfg_attr(test, automock)]
 #[async_trait]
 pub trait ReferenceRepository: Send + Sync {
-    async fn list_references(&self) -> Result<Vec<Reference>, AppError>;
+    async fn list_references(&self, filters: PaginationAndFilters) -> Result<Vec<Reference>, AppError>;
     async fn create_reference(&self, req: CreateReference) -> Result<Reference, AppError>;
     async fn update_reference(&self, id: Uuid, req: UpdateReference) -> Result<Reference, AppError>;
     async fn delete_reference(&self, id: Uuid) -> Result<(), AppError>;
@@ -25,9 +26,9 @@ impl From<ReferenceEntity::Model> for Reference {
     fn from(model: ReferenceEntity::Model) -> Self {
         Self {
             id: model.id,
-            title: model.title,
+            title: serde_json::from_str(&model.title).unwrap_or_else(|_| serde_json::Value::String(model.title.clone())),
             url: model.url,
-            description: model.description,
+            description: model.description.map(|d| serde_json::from_str(&d).unwrap_or_else(|_| serde_json::Value::String(d))),
             r#type: model.r#type,
             created_at: model.created_at,
             updated_at: model.updated_at,
@@ -37,20 +38,27 @@ impl From<ReferenceEntity::Model> for Reference {
 
 #[async_trait]
 impl ReferenceRepository for ReferenceRepositoryImpl {
-    async fn list_references(&self) -> Result<Vec<Reference>, AppError> {
-        let refs: Vec<ReferenceEntity::Model> = ReferenceEntity::Entity::find()
-            .order_by_desc(ReferenceEntity::Column::CreatedAt)
-            .all(&self.db)
-            .await?;
+    async fn list_references(&self, filters: PaginationAndFilters) -> Result<Vec<Reference>, AppError> {
+        let mut query = ReferenceEntity::Entity::find().order_by_desc(ReferenceEntity::Column::CreatedAt);
+
+        if let Some(search) = filters.search {
+            query = query.filter(ReferenceEntity::Column::Title.contains(&search));
+        }
+
+        let limit = filters.limit.unwrap_or(50);
+        let page = filters.page.unwrap_or(1).max(1);
+        let offset = (page - 1) * limit;
+
+        let refs: Vec<ReferenceEntity::Model> = query.limit(limit).offset(offset).all(&self.db).await?;
         Ok(refs.into_iter().map(Reference::from).collect())
     }
 
     async fn create_reference(&self, req: CreateReference) -> Result<Reference, AppError> {
         let new_ref = ReferenceEntity::ActiveModel {
             id: Set(Uuid::new_v4()),
-            title: Set(req.title),
+            title: Set(req.title.to_string()),
             url: Set(req.url),
-            description: Set(req.description),
+            description: Set(req.description.map(|d| d.to_string())),
             r#type: Set(req.r#type),
             created_at: Set(Utc::now()),
             updated_at: Set(Utc::now()),
@@ -67,9 +75,9 @@ impl ReferenceRepository for ReferenceRepositoryImpl {
             .ok_or_else(|| AppError::NotFound("Reference not found".to_string()))?
             .into();
 
-        if let Some(title) = req.title { r.title = Set(title); }
+        if let Some(title) = req.title { r.title = Set(title.to_string()); }
         if let Some(url) = req.url { r.url = Set(url); }
-        if let Some(desc) = req.description { r.description = Set(Some(desc)); }
+        if let Some(desc) = req.description { r.description = Set(Some(desc.to_string())); }
         if let Some(t) = req.r#type { r.r#type = Set(t); }
 
         r.updated_at = Set(Utc::now());

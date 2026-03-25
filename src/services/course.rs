@@ -13,8 +13,8 @@ impl CourseService {
         Self { course_repo }
     }
 
-    pub async fn list_all_courses(&self) -> Result<Vec<Course>, AppError> {
-        self.course_repo.list_courses().await
+    pub async fn list_all_courses(&self, filters: crate::models::common::PaginationAndFilters) -> Result<Vec<Course>, AppError> {
+        self.course_repo.list_courses(filters).await
     }
 
     pub async fn get_course_structure(&self, course_id: Uuid) -> Result<CourseDetails, AppError> {
@@ -46,6 +46,7 @@ impl CourseService {
             title: course.title,
             description: course.description,
             level: course.level,
+            image_url: course.image_url,
             modules: module_details,
         })
     }
@@ -74,5 +75,29 @@ impl CourseService {
 
     pub async fn delete_course(&self, course_id: Uuid) -> Result<(), AppError> {
         self.course_repo.delete_course(course_id).await
+    }
+
+    pub async fn create_module(&self, course_id: Uuid, req: crate::models::course::CreateModule) -> Result<crate::models::course::Module, AppError> {
+        self.course_repo.create_module(course_id, req).await
+    }
+
+    pub async fn update_module(&self, module_id: Uuid, req: crate::models::course::UpdateModule) -> Result<crate::models::course::Module, AppError> {
+        self.course_repo.update_module(module_id, req).await
+    }
+
+    pub async fn delete_module(&self, module_id: Uuid) -> Result<(), AppError> {
+        self.course_repo.delete_module(module_id).await
+    }
+
+    pub async fn create_chapter(&self, module_id: Uuid, req: crate::models::course::CreateChapter) -> Result<crate::models::course::Chapter, AppError> {
+        self.course_repo.create_chapter(module_id, req).await
+    }
+
+    pub async fn update_chapter(&self, chapter_id: Uuid, req: crate::models::course::UpdateChapter) -> Result<crate::models::course::Chapter, AppError> {
+        self.course_repo.update_chapter(chapter_id, req).await
+    }
+
+    pub async fn delete_chapter(&self, chapter_id: Uuid) -> Result<(), AppError> {
+        self.course_repo.delete_chapter(chapter_id).await
     }
 }

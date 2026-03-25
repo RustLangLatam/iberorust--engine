@@ -20,9 +20,10 @@ async fn test_get_course_structure_with_modules() {
         .returning(move |id| {
             Ok(Some(Course {
                 id,
-                title: "Rust for Beginners".to_string(),
-                description: Some("Learn Rust".to_string()),
+                title: serde_json::Value::String("Rust for Beginners".to_string()),
+                description: Some(serde_json::Value::String("Learn Rust".to_string())),
                 level: Some("Beginner".to_string()),
+                image_url: None,
                 created_at: Utc::now(),
                 updated_at: Utc::now(),
             }))
@@ -36,7 +37,7 @@ async fn test_get_course_structure_with_modules() {
             Ok(vec![Module {
                 id: module_id,
                 course_id: c_id,
-                title: "Intro to Rust".to_string(),
+                title: serde_json::Value::String("Intro to Rust".to_string()),
                 description: None,
                 order: 1,
                 created_at: Utc::now(),
@@ -51,8 +52,9 @@ async fn test_get_course_structure_with_modules() {
         .returning(move |_m_id| {
             Ok(vec![ChapterSummary {
                 id: Uuid::new_v4(),
-                title: "Hello World".to_string(),
+                title: serde_json::Value::String("Hello World".to_string()),
                 is_quiz: Some(false),
+                video_url: None,
                 order: 1,
             }])
         });
@@ -65,7 +67,7 @@ async fn test_get_course_structure_with_modules() {
         .expect("Failed to get course structure");
 
     assert_eq!(structure.id, course_id);
-    assert_eq!(structure.title, "Rust for Beginners");
+    assert_eq!(structure.title, serde_json::Value::String("Rust for Beginners".to_string()));
     assert_eq!(structure.modules.len(), 1);
     assert_eq!(structure.modules[0].id, module_id);
     assert_eq!(structure.modules[0].chapters.len(), 1);

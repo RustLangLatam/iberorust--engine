@@ -38,6 +38,12 @@ use utoipa_swagger_ui::SwaggerUi;
         handlers::course::create_course,
         handlers::course::update_course,
         handlers::course::delete_course,
+        handlers::course::create_module,
+        handlers::course::update_module,
+        handlers::course::delete_module,
+        handlers::course::create_chapter,
+        handlers::course::update_chapter,
+        handlers::course::delete_chapter,
         handlers::progress::get_progress,
         handlers::progress::save_chapter_progress,
         handlers::progress::get_certifications,
@@ -92,6 +98,10 @@ use utoipa_swagger_ui::SwaggerUi;
             models::course::ChapterSummary,
             models::course::CreateCourse,
             models::course::UpdateCourse,
+            models::course::CreateModule,
+            models::course::UpdateModule,
+            models::course::CreateChapter,
+            models::course::UpdateChapter,
             models::progress::Progress,
             models::progress::Certification,
             models::progress::QuizSubmission,
@@ -253,6 +263,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .route("/{id}", get(handlers::course::get_course))
         .route("/{id}", put(handlers::course::update_course))
         .route("/{id}", delete(handlers::course::delete_course))
+        .route("/{course_id}/modules", post(handlers::course::create_module))
+        .route("/{course_id}/modules/{module_id}", put(handlers::course::update_module))
+        .route("/{course_id}/modules/{module_id}", delete(handlers::course::delete_module))
+        .route("/{course_id}/modules/{module_id}/chapters", post(handlers::course::create_chapter))
+        .route("/{course_id}/modules/{module_id}/chapters/{chapter_id}", put(handlers::course::update_chapter))
+        .route("/{course_id}/modules/{module_id}/chapters/{chapter_id}", delete(handlers::course::delete_chapter))
         .route("/{course_id}/chapters/{chapter_id}", get(handlers::course::get_chapter));
 
     let progress_routes = Router::new()

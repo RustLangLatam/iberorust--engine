@@ -11,6 +11,8 @@ pub struct Model {
     pub content: String,
     pub is_quiz: Option<bool>,
     pub order: i32,
+    #[sea_orm(column_type = "Text")]
+    pub video_url: Option<String>,
     pub created_at: DateTimeUtc,
     pub updated_at: DateTimeUtc,
 }

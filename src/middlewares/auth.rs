@@ -1,6 +1,7 @@
 use crate::error::AppError;
 use crate::services::auth::Claims;
-use axum::{extract::FromRequestParts, http::request::Parts};
+use crate::state::SharedState;
+use axum::{extract::{FromRequestParts, State}, http::request::Parts};
 use jsonwebtoken::{decode, DecodingKey, Validation};
 
 pub struct AuthUser {
@@ -9,13 +10,10 @@ pub struct AuthUser {
     pub role: String,
 }
 
-impl<S> FromRequestParts<S> for AuthUser
-where
-    S: Send + Sync,
-{
+impl FromRequestParts<SharedState> for AuthUser {
     type Rejection = AppError;
 
-    async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
+    async fn from_request_parts(parts: &mut Parts, state: &SharedState) -> Result<Self, Self::Rejection> {
         let auth_header = parts
             .headers
             .get("Authorization")
@@ -26,13 +24,9 @@ where
                 AppError::AuthError("Missing or invalid Authorization header".to_string())
             })?;
 
-        let secret = std::env::var("JWT_SECRET").map_err(|_| {
-            AppError::InternalServerError(anyhow::anyhow!("JWT_SECRET not set in environment"))
-        })?;
-
         let token_data = decode::<Claims>(
             auth_header,
-            &DecodingKey::from_secret(secret.as_bytes()),
+            &DecodingKey::from_secret(state.config.auth.jwt_secret.as_bytes()),
             &Validation::default(),
         )
         .map_err(|_| AppError::AuthError("Invalid token".to_string()))?;

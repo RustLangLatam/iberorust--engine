@@ -38,7 +38,7 @@ async fn test_login_guest_creates_new_user_and_returns_jwt() {
         std::env::set_var("JWT_SECRET", "test_secret_key");
     }
 
-    let auth_service = AuthService::new(Arc::new(mock_repo));
+    let auth_service = AuthService::new(Arc::new(mock_repo), "test_secret_key".to_string());
 
     let jwt = auth_service.login_guest().await.expect("Failed to login guest");
 
@@ -52,7 +52,7 @@ async fn test_login_guest_creates_new_user_and_returns_jwt() {
 #[tokio::test]
 async fn test_verify_google_token_invalid_format() {
     let mock_repo = MockUserRepository::new();
-    let auth_service = AuthService::new(Arc::new(mock_repo));
+    let auth_service = AuthService::new(Arc::new(mock_repo), "test_secret_key".to_string());
 
     let result = auth_service.verify_google_token("invalid_token").await;
 

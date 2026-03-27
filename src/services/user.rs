@@ -36,8 +36,8 @@ impl UserService {
         self.user_repo.get_admin_stats().await
     }
 
-    pub async fn list_users(&self) -> Result<Vec<User>, AppError> {
-        self.user_repo.list_users().await
+    pub async fn list_users(&self, filters: crate::models::common::PaginationAndFilters) -> Result<Vec<User>, AppError> {
+        self.user_repo.list_users(filters).await
     }
 
     pub async fn update_user_role(&self, user_id: Uuid, req: UserRoleUpdate) -> Result<User, AppError> {

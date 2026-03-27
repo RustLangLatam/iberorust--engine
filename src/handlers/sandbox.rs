@@ -2,6 +2,12 @@ use crate::error::AppError;
 use axum::Json;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
+use axum::{routing::post, Router};
+
+pub fn routes() -> Router<crate::state::SharedState> {
+    Router::new()
+        .route("/execute", post(execute_code))
+}
 
 #[derive(Debug, Deserialize, ToSchema)]
 pub struct ExecuteCodeRequest {

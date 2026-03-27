@@ -13,8 +13,8 @@ impl PostService {
         Self { post_repo }
     }
 
-    pub async fn list_posts(&self) -> Result<Vec<PostSummary>, AppError> {
-        self.post_repo.list_posts().await
+    pub async fn list_posts(&self, filters: crate::models::common::PaginationAndFilters) -> Result<Vec<PostSummary>, AppError> {
+        self.post_repo.list_posts(filters).await
     }
 
     pub async fn get_post(&self, post_id: Uuid) -> Result<Post, AppError> {

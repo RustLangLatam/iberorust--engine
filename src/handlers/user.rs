@@ -3,11 +3,27 @@ use crate::middlewares::auth::{AdminUser, AuthUser};
 use crate::models::user::{AdminStats, UpdateUser, User, UserRoleUpdate, UserStats};
 use crate::state::SharedState;
 use axum::{
-    extract::{Path, State},
+    extract::{Path, Query, State},
     Json,
 };
+use crate::models::common::PaginationAndFilters;
 use uuid::Uuid;
 use validator::Validate;
+use axum::{routing::{get, put, delete}, Router};
+
+pub fn routes() -> Router<crate::state::SharedState> {
+    Router::new()
+        .route("/", get(list_users))
+        .route("/me", get(get_me).put(update_me))
+        .route("/{id}/stats", get(get_stats))
+        .route("/{id}/role", put(update_user_role))
+        .route("/{id}", delete(delete_user))
+}
+
+pub fn admin_routes() -> Router<crate::state::SharedState> {
+    Router::new()
+        .route("/stats", get(get_admin_stats))
+}
 
 #[utoipa::path(
     get,
@@ -76,6 +92,9 @@ pub async fn get_stats(
 #[utoipa::path(
     get,
     path = "/api/v1/users",
+    params(
+        crate::models::common::PaginationAndFilters
+    ),
     responses(
         (status = 200, description = "List of users", body = Vec<User>)
     ),
@@ -87,8 +106,9 @@ pub async fn get_stats(
 pub async fn list_users(
     State(state): State<SharedState>,
     _admin: AdminUser,
+    Query(query): Query<PaginationAndFilters>,
 ) -> Result<Json<Vec<User>>, AppError> {
-    let users = state.user_service.list_users().await?;
+    let users = state.user_service.list_users(query).await?;
     Ok(Json(users))
 }
 

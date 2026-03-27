@@ -2,21 +2,35 @@ use crate::error::AppError;
 use crate::models::post::{CreatePost, Post, PostSummary, UpdatePost};
 use crate::state::SharedState;
 use axum::{
-    extract::{Path, State},
+    extract::{Path, Query, State},
     Json,
 };
+use crate::models::common::PaginationAndFilters;
 use uuid::Uuid;
+use axum::{routing::{get, post, put, delete}, Router};
+
+pub fn routes() -> Router<crate::state::SharedState> {
+    Router::new()
+        .route("/", get(list_posts).post(create_post))
+        .route("/{id}", get(get_post).put(update_post).delete(delete_post))
+}
 
 #[utoipa::path(
     get,
     path = "/api/v1/posts",
+    params(
+        crate::models::common::PaginationAndFilters
+    ),
     responses(
         (status = 200, description = "List of posts summary", body = Vec<PostSummary>)
     ),
     tag = "Posts"
 )]
-pub async fn list_posts(State(state): State<SharedState>) -> Result<Json<Vec<PostSummary>>, AppError> {
-    let posts = state.post_service.list_posts().await?;
+pub async fn list_posts(
+    State(state): State<SharedState>,
+    Query(query): Query<PaginationAndFilters>,
+) -> Result<Json<Vec<PostSummary>>, AppError> {
+    let posts = state.post_service.list_posts(query).await?;
     Ok(Json(posts))
 }
 

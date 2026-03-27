@@ -9,10 +9,7 @@ pub mod state;
 pub mod entities;
 
 use crate::state::{AppState, SharedState};
-use axum::{
-    routing::{delete, get, post, put},
-    Router,
-};
+use axum::Router;
 use sea_orm::{ConnectOptions, Database};
 use std::sync::Arc;
 use tokio::sync::broadcast;
@@ -23,12 +20,18 @@ use std::time::Duration;
 use migration::{Migrator, MigratorTrait};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
+use argon2::{
+    password_hash::{rand_core::OsRng, PasswordHasher, SaltString},
+    Argon2,
+};
+use sea_orm::Set;
 
 #[derive(OpenApi)]
 #[openapi(
     paths(
         handlers::auth::google_login,
         handlers::auth::guest_login,
+        handlers::auth::login,
         handlers::user::get_me,
         handlers::user::update_me,
         handlers::user::get_stats,
@@ -38,6 +41,12 @@ use utoipa_swagger_ui::SwaggerUi;
         handlers::course::create_course,
         handlers::course::update_course,
         handlers::course::delete_course,
+        handlers::course::create_module,
+        handlers::course::update_module,
+        handlers::course::delete_module,
+        handlers::course::create_chapter,
+        handlers::course::update_chapter,
+        handlers::course::delete_chapter,
         handlers::progress::get_progress,
         handlers::progress::save_chapter_progress,
         handlers::progress::get_certifications,
@@ -92,6 +101,10 @@ use utoipa_swagger_ui::SwaggerUi;
             models::course::ChapterSummary,
             models::course::CreateCourse,
             models::course::UpdateCourse,
+            models::course::CreateModule,
+            models::course::UpdateModule,
+            models::course::CreateChapter,
+            models::course::UpdateChapter,
             models::progress::Progress,
             models::progress::Certification,
             models::progress::QuizSubmission,
@@ -115,6 +128,7 @@ use utoipa_swagger_ui::SwaggerUi;
             models::contact::Inquiry,
             models::contact::SubmitInquiryRequest,
             handlers::auth::GoogleLoginRequest,
+            handlers::auth::LoginRequest,
             handlers::auth::AuthResponse,
             handlers::sandbox::ExecuteCodeRequest,
             handlers::sandbox::ExecuteCodeResponse,
@@ -144,6 +158,55 @@ use utoipa_swagger_ui::SwaggerUi;
 )]
 pub struct ApiDoc;
 
+async fn seed_admin_user(db: &sea_orm::DatabaseConnection) -> Result<(), Box<dyn std::error::Error>> {
+    use crate::entities::user as UserEntity;
+    use sea_orm::{EntityTrait, ColumnTrait, QueryFilter};
+    use chrono::Utc;
+    use uuid::Uuid;
+    use sea_orm::ActiveModelTrait;
+
+    let default_email = "admin@rustedu.com".to_string();
+    let default_password = "secure_admin_password_123";
+
+    let admin_exists = UserEntity::Entity::find()
+        .filter(UserEntity::Column::Email.eq(&default_email))
+        .one(db)
+        .await?;
+
+    if admin_exists.is_none() {
+        tracing::info!("Admin user not found. Seeding default admin...");
+
+        let salt = SaltString::generate(&mut OsRng);
+        let argon2 = Argon2::default();
+        let password_hash = argon2
+            .hash_password(default_password.as_bytes(), &salt)
+            .map_err(|e| anyhow::anyhow!("Argon2 hash failed: {}", e))?
+            .to_string();
+
+        let new_user = UserEntity::ActiveModel {
+            id: Set(Uuid::new_v4()),
+            email: Set(default_email),
+            google_id: Set(None), // Not a Google user
+            is_guest: Set(false),
+            name: Set("System Admin".to_string()),
+            avatar_url: Set(None),
+            password_hash: Set(Some(password_hash)),
+            preferred_language: Set(Some("EN".to_string())),
+            theme: Set(Some("system".to_string())),
+            role: Set("ADMIN".to_string()),
+            created_at: Set(Utc::now()),
+            updated_at: Set(Utc::now()),
+        };
+
+        new_user.insert(db).await?;
+        tracing::info!("Default admin user created successfully.");
+    } else {
+        tracing::info!("Admin user already exists. Skipping seed.");
+    }
+
+    Ok(())
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let app_config = config::AppConfig::load()?;
@@ -171,6 +234,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     tracing::info!("Running migrations...");
     Migrator::up(&db, None).await?;
+
+    tracing::info!("Checking for default admin seed...");
+    seed_admin_user(&db).await?;
 
     // Create the SSE broadcast channel
     let (sse_sender, _rx) = broadcast::channel(100);
@@ -229,103 +295,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .allow_methods(Any)
         .allow_headers(Any);
 
-    let auth_routes = Router::new()
-        .route("/google", post(handlers::auth::google_login))
-        .route("/guest", post(handlers::auth::guest_login));
-
-    let user_routes = Router::new()
-        .route("/", get(handlers::user::list_users))
-        .route("/me", get(handlers::user::get_me))
-        .route("/me", put(handlers::user::update_me))
-        .route("/{id}/stats", get(handlers::user::get_stats))
-        .route("/{id}/role", put(handlers::user::update_user_role))
-        .route("/{id}", delete(handlers::user::delete_user));
-
-    let admin_routes = Router::new()
-        .route("/stats", get(handlers::user::get_admin_stats));
-
-    let upload_routes = Router::new()
-        .route("/image", post(handlers::upload::upload_image));
-
-    let course_routes = Router::new()
-        .route("/", get(handlers::course::list_courses))
-        .route("/", post(handlers::course::create_course))
-        .route("/{id}", get(handlers::course::get_course))
-        .route("/{id}", put(handlers::course::update_course))
-        .route("/{id}", delete(handlers::course::delete_course))
-        .route("/{course_id}/chapters/{chapter_id}", get(handlers::course::get_chapter));
-
-    let progress_routes = Router::new()
-        .route("/", get(handlers::progress::get_progress))
-        .route("/chapters/{chapter_id}", post(handlers::progress::save_chapter_progress));
-
-    let cert_routes = Router::new()
-        .route("/", get(handlers::progress::get_certifications))
-        .route("/generate/{course_id}", post(handlers::progress::generate_cert));
-
-    let community_routes = Router::new()
-        .route("/", get(handlers::community::list_threads))
-        .route("/", post(handlers::community::create_thread))
-        .route("/{id}", get(handlers::community::get_thread))
-        .route("/{id}", put(handlers::community::update_thread))
-        .route("/{id}", delete(handlers::community::delete_thread))
-        .route("/{id}/comments", post(handlers::community::add_thread_comment))
-        .route("/{id}/like", post(handlers::community::toggle_like_thread));
-
-    let comments_routes = Router::new()
-        .route("/{id}/like", post(handlers::community::toggle_like_comment))
-        .route("/{id}", put(handlers::community::update_comment))
-        .route("/{id}", delete(handlers::community::delete_comment));
-
-    let notification_routes = Router::new()
-        .route("/", get(handlers::notification::list_notifications))
-        .route("/{id}/read", put(handlers::notification::mark_as_read))
-        .route("/read-all", put(handlers::notification::mark_all_as_read));
-
-    let stream_routes = Router::new()
-        .route("/notifications", get(handlers::notification::sse_stream));
-
-    let sandbox_routes = Router::new()
-        .route("/execute", post(handlers::sandbox::execute_code));
-
-    let post_routes = Router::new()
-        .route("/", get(handlers::post::list_posts))
-        .route("/", post(handlers::post::create_post))
-        .route("/{id}", get(handlers::post::get_post))
-        .route("/{id}", put(handlers::post::update_post))
-        .route("/{id}", delete(handlers::post::delete_post));
-
-    let ai_routes = Router::new()
-        .route("/tts", post(handlers::ai::tts_proxy))
-        .route("/image-edit", post(handlers::ai::image_edit_proxy))
-        .route("/chat", post(handlers::ai::chat_proxy));
-
-    let contact_routes = Router::new()
-        .route("/inquiry", post(handlers::contact::submit_inquiry));
-
-    let reference_routes = Router::new()
-        .route("/", get(handlers::reference::list_references))
-        .route("/", post(handlers::reference::create_reference))
-        .route("/{id}", put(handlers::reference::update_reference))
-        .route("/{id}", delete(handlers::reference::delete_reference));
-
-    let api_routes = Router::new()
-        .nest("/auth", auth_routes)
-        .nest("/users", user_routes)
-        .nest("/courses", course_routes)
-        .nest("/progress", progress_routes)
-        .nest("/certifications", cert_routes)
-        .nest("/threads", community_routes)
-        .nest("/comments", comments_routes)
-        .nest("/notifications", notification_routes)
-        .nest("/stream", stream_routes)
-        .nest("/sandbox", sandbox_routes)
-        .nest("/posts", post_routes)
-        .nest("/ai", ai_routes)
-        .nest("/contact", contact_routes)
-        .nest("/references", reference_routes)
-        .nest("/admin", admin_routes)
-        .nest("/uploads", upload_routes);
+    let api_routes = handlers::api_router();
 
     let app = Router::new()
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))

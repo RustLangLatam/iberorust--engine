@@ -4,9 +4,23 @@ use crate::models::progress::{Certification, Progress, QuizResult, QuizSubmissio
 use crate::state::SharedState;
 use axum::{
     extract::{Path, State},
+    routing::{get, post},
     Json,
+    Router,
 };
 use uuid::Uuid;
+
+pub fn routes() -> Router<crate::state::SharedState> {
+    Router::new()
+        .route("/", get(get_progress))
+        .route("/chapters/{chapter_id}", post(save_chapter_progress))
+}
+
+pub fn cert_routes() -> Router<crate::state::SharedState> {
+    Router::new()
+        .route("/", get(get_certifications))
+        .route("/generate/{course_id}", post(generate_cert))
+}
 
 #[utoipa::path(
     get,

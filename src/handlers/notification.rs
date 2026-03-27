@@ -11,6 +11,19 @@ use futures::stream::{Stream, StreamExt};
 use std::convert::Infallible;
 use tokio_stream::wrappers::BroadcastStream;
 use uuid::Uuid;
+use axum::{routing::{get, put}, Router};
+
+pub fn routes() -> Router<crate::state::SharedState> {
+    Router::new()
+        .route("/", get(list_notifications))
+        .route("/{id}/read", put(mark_as_read))
+        .route("/read-all", put(mark_all_as_read))
+}
+
+pub fn stream_routes() -> Router<crate::state::SharedState> {
+    Router::new()
+        .route("/notifications", get(sse_stream))
+}
 
 #[utoipa::path(
     get,

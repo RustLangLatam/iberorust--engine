@@ -7,11 +7,12 @@ use mockall::automock;
 use sea_orm::*;
 use uuid::Uuid;
 use chrono::Utc;
+use crate::models::common::PaginationAndFilters;
 
 #[cfg_attr(test, automock)]
 #[async_trait]
 pub trait CommunityRepository: Send + Sync {
-    async fn list_threads(&self) -> Result<Vec<Thread>, AppError>;
+    async fn list_threads(&self, filters: PaginationAndFilters) -> Result<Vec<Thread>, AppError>;
     async fn get_thread(&self, thread_id: Uuid) -> Result<Option<Thread>, AppError>;
     async fn create_thread(&self, author_id: Uuid, req: CreateThreadRequest) -> Result<Thread, AppError>;
     async fn update_thread(&self, thread_id: Uuid, req: UpdateThreadRequest) -> Result<Thread, AppError>;
@@ -61,11 +62,22 @@ impl From<comment::Model> for Comment {
 
 #[async_trait]
 impl CommunityRepository for CommunityRepositoryImpl {
-    async fn list_threads(&self) -> Result<Vec<Thread>, AppError> {
-        let threads = ThreadEntity::Entity::find()
-            .order_by_desc(ThreadEntity::Column::CreatedAt)
-            .all(&self.db)
-            .await?;
+    async fn list_threads(&self, filters: PaginationAndFilters) -> Result<Vec<Thread>, AppError> {
+        let mut query = ThreadEntity::Entity::find().order_by_desc(ThreadEntity::Column::CreatedAt);
+
+        if let Some(tag) = filters.tag {
+            // Because unnest() and array containment can be finicky in query builder,
+            // we'll use a simpler raw expression for the filter: `? = ANY(tags)`
+            query = query.filter(
+                sea_query::Expr::val(tag).eq(sea_query::Expr::cust("ANY(tags)"))
+            );
+        }
+
+        let limit = filters.limit.unwrap_or(50);
+        let page = filters.page.unwrap_or(1).max(1);
+        let offset = (page - 1) * limit;
+
+        let threads: Vec<ThreadEntity::Model> = query.limit(limit).offset(offset).all(&self.db).await?;
 
         Ok(threads.into_iter().map(Thread::from).collect())
     }

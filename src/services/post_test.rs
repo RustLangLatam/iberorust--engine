@@ -15,10 +15,12 @@ async fn test_list_posts_returns_summaries() {
     mock_repo
         .expect_list_posts()
         .times(1)
-        .returning(move || {
+        .returning(move |_| {
             Ok(vec![PostSummary {
                 id: post_id,
-                title: "First Post".to_string(),
+                title: serde_json::Value::String("First Post".to_string()),
+                image_url: None,
+                tags: None,
                 author_id: Some(author_id),
                 published_at: Some(Utc::now()),
             }])
@@ -26,11 +28,11 @@ async fn test_list_posts_returns_summaries() {
 
     let service = PostService::new(Arc::new(mock_repo));
 
-    let list = service.list_posts().await.expect("Failed to list posts");
+    let list = service.list_posts(crate::models::common::PaginationAndFilters::default()).await.expect("Failed to list posts");
 
     assert_eq!(list.len(), 1);
     assert_eq!(list[0].id, post_id);
-    assert_eq!(list[0].title, "First Post");
+    assert_eq!(list[0].title, serde_json::Value::String("First Post".to_string()));
 }
 
 #[tokio::test]

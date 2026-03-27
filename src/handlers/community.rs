@@ -5,15 +5,34 @@ use crate::models::community::{
 };
 use crate::state::SharedState;
 use axum::{
-    extract::{Path, State},
+    extract::{Path, Query, State},
     http::StatusCode,
     Json,
 };
+use crate::models::common::PaginationAndFilters;
 use uuid::Uuid;
+use axum::{routing::{get, post, put, delete}, Router};
+
+pub fn thread_routes() -> Router<crate::state::SharedState> {
+    Router::new()
+        .route("/", get(list_threads).post(create_thread))
+        .route("/{id}", get(get_thread).put(update_thread).delete(delete_thread))
+        .route("/{id}/comments", post(add_thread_comment))
+        .route("/{id}/like", post(toggle_like_thread))
+}
+
+pub fn comment_routes() -> Router<crate::state::SharedState> {
+    Router::new()
+        .route("/{id}/like", post(toggle_like_comment))
+        .route("/{id}", put(update_comment).delete(delete_comment))
+}
 
 #[utoipa::path(
     get,
     path = "/api/v1/threads",
+    params(
+        crate::models::common::PaginationAndFilters
+    ),
     responses(
         (status = 200, description = "List of discussion threads", body = Vec<Thread>)
     ),
@@ -21,8 +40,9 @@ use uuid::Uuid;
 )]
 pub async fn list_threads(
     State(state): State<SharedState>,
+    Query(query): Query<PaginationAndFilters>,
 ) -> Result<Json<Vec<Thread>>, AppError> {
-    let threads = state.community_service.list_threads().await?;
+    let threads = state.community_service.list_threads(query).await?;
     Ok(Json(threads))
 }
 

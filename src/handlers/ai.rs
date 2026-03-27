@@ -2,6 +2,14 @@ use crate::error::AppError;
 use axum::Json;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
+use axum::{routing::post, Router};
+
+pub fn routes() -> Router<crate::state::SharedState> {
+    Router::new()
+        .route("/tts", post(tts_proxy))
+        .route("/image-edit", post(image_edit_proxy))
+        .route("/chat", post(chat_proxy))
+}
 
 #[derive(Debug, Deserialize, ToSchema)]
 pub struct TtsRequest {

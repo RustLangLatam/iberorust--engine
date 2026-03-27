@@ -3,21 +3,35 @@ use crate::models::reference::{CreateReference, Reference, UpdateReference};
 use crate::middlewares::auth::AdminUser;
 use crate::state::SharedState;
 use axum::{
-    extract::{Path, State},
+    extract::{Path, Query, State},
     Json,
 };
+use crate::models::common::PaginationAndFilters;
 use uuid::Uuid;
+use axum::{routing::{get, post, put, delete}, Router};
+
+pub fn routes() -> Router<crate::state::SharedState> {
+    Router::new()
+        .route("/", get(list_references).post(create_reference))
+        .route("/{id}", put(update_reference).delete(delete_reference))
+}
 
 #[utoipa::path(
     get,
     path = "/api/v1/references",
+    params(
+        crate::models::common::PaginationAndFilters
+    ),
     responses(
         (status = 200, description = "List of references", body = Vec<Reference>)
     ),
     tag = "References"
 )]
-pub async fn list_references(State(state): State<SharedState>) -> Result<Json<Vec<Reference>>, AppError> {
-    let refs = state.reference_service.list_references().await?;
+pub async fn list_references(
+    State(state): State<SharedState>,
+    Query(query): Query<PaginationAndFilters>,
+) -> Result<Json<Vec<Reference>>, AppError> {
+    let refs = state.reference_service.list_references(query).await?;
     Ok(Json(refs))
 }
 

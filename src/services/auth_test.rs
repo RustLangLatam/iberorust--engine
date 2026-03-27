@@ -26,6 +26,7 @@ async fn test_login_guest_creates_new_user_and_returns_jwt() {
                 is_guest,
                 name: req.name,
                 avatar_url: None,
+                password_hash: None,
                 preferred_language: Some("EN".to_string()),
                 theme: Some("system".to_string()),
                 role: "USER".to_string(),

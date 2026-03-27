@@ -7,9 +7,12 @@ use uuid::Uuid;
 pub struct Course {
     #[schema(value_type = String)]
     pub id: Uuid,
-    pub title: String,
-    pub description: Option<String>,
+    #[schema(value_type = Object)]
+    pub title: serde_json::Value,
+    #[schema(value_type = Object)]
+    pub description: Option<serde_json::Value>,
     pub level: Option<String>,
+    pub image_url: Option<String>,
     #[schema(value_type = String)]
     pub created_at: DateTime<Utc>,
     #[schema(value_type = String)]
@@ -22,8 +25,10 @@ pub struct Module {
     pub id: Uuid,
     #[schema(value_type = String)]
     pub course_id: Uuid,
-    pub title: String,
-    pub description: Option<String>,
+    #[schema(value_type = Object)]
+    pub title: serde_json::Value,
+    #[schema(value_type = Object)]
+    pub description: Option<serde_json::Value>,
     pub order: i32,
     #[schema(value_type = String)]
     pub created_at: DateTime<Utc>,
@@ -37,9 +42,11 @@ pub struct Chapter {
     pub id: Uuid,
     #[schema(value_type = String)]
     pub module_id: Uuid,
-    pub title: String,
+    #[schema(value_type = Object)]
+    pub title: serde_json::Value,
     pub content: String,
     pub is_quiz: Option<bool>,
+    pub video_url: Option<String>,
     pub order: i32,
     #[schema(value_type = String)]
     pub created_at: DateTime<Utc>,
@@ -51,9 +58,12 @@ pub struct Chapter {
 pub struct CourseDetails {
     #[schema(value_type = String)]
     pub id: Uuid,
-    pub title: String,
-    pub description: Option<String>,
+    #[schema(value_type = Object)]
+    pub title: serde_json::Value,
+    #[schema(value_type = Object)]
+    pub description: Option<serde_json::Value>,
     pub level: Option<String>,
+    pub image_url: Option<String>,
     pub modules: Vec<ModuleDetails>,
 }
 
@@ -61,8 +71,10 @@ pub struct CourseDetails {
 pub struct ModuleDetails {
     #[schema(value_type = String)]
     pub id: Uuid,
-    pub title: String,
-    pub description: Option<String>,
+    #[schema(value_type = Object)]
+    pub title: serde_json::Value,
+    #[schema(value_type = Object)]
+    pub description: Option<serde_json::Value>,
     pub order: i32,
     pub chapters: Vec<ChapterSummary>,
 }
@@ -71,21 +83,67 @@ pub struct ModuleDetails {
 pub struct ChapterSummary {
     #[schema(value_type = String)]
     pub id: Uuid,
-    pub title: String,
+    #[schema(value_type = Object)]
+    pub title: serde_json::Value,
     pub is_quiz: Option<bool>,
+    pub video_url: Option<String>,
     pub order: i32,
 }
 
 #[derive(Debug, Deserialize, ToSchema)]
 pub struct CreateCourse {
-    pub title: String,
-    pub description: Option<String>,
+    #[schema(value_type = Object)]
+    pub title: serde_json::Value,
+    #[schema(value_type = Object)]
+    pub description: Option<serde_json::Value>,
     pub level: Option<String>,
+    pub image_url: Option<String>,
+}
+
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct CreateModule {
+    #[schema(value_type = Object)]
+    pub title: serde_json::Value,
+    #[schema(value_type = Object)]
+    pub description: Option<serde_json::Value>,
+    pub order: i32,
+}
+
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct UpdateModule {
+    #[schema(value_type = Object)]
+    pub title: Option<serde_json::Value>,
+    #[schema(value_type = Object)]
+    pub description: Option<serde_json::Value>,
+    pub order: Option<i32>,
+}
+
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct CreateChapter {
+    #[schema(value_type = Object)]
+    pub title: serde_json::Value,
+    pub content: String,
+    pub is_quiz: Option<bool>,
+    pub video_url: Option<String>,
+    pub order: i32,
+}
+
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct UpdateChapter {
+    #[schema(value_type = Object)]
+    pub title: Option<serde_json::Value>,
+    pub content: Option<String>,
+    pub is_quiz: Option<bool>,
+    pub video_url: Option<String>,
+    pub order: Option<i32>,
 }
 
 #[derive(Debug, Deserialize, ToSchema)]
 pub struct UpdateCourse {
-    pub title: Option<String>,
-    pub description: Option<String>,
+    #[schema(value_type = Object)]
+    pub title: Option<serde_json::Value>,
+    #[schema(value_type = Object)]
+    pub description: Option<serde_json::Value>,
     pub level: Option<String>,
+    pub image_url: Option<String>,
 }

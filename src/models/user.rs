@@ -13,6 +13,8 @@ pub struct User {
     pub is_guest: bool,
     pub name: String,
     pub avatar_url: Option<String>,
+    #[serde(skip_serializing)]
+    pub password_hash: Option<String>,
     pub preferred_language: Option<String>,
     pub theme: Option<String>,
     pub role: String,
@@ -30,6 +32,7 @@ pub struct CreateUser {
     pub name: String,
     pub google_id: Option<String>,
     pub avatar_url: Option<String>,
+    pub password_hash: Option<String>,
 }
 
 #[derive(Debug, Deserialize, Validate, ToSchema)]

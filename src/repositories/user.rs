@@ -7,6 +7,7 @@ use mockall::automock;
 use sea_orm::*;
 use uuid::Uuid;
 use chrono::Utc;
+use crate::models::common::PaginationAndFilters;
 
 #[cfg_attr(test, automock)]
 #[async_trait]
@@ -17,7 +18,7 @@ pub trait UserRepository: Send + Sync {
     async fn update_user(&self, id: Uuid, update: UpdateUser) -> Result<User, AppError>;
     async fn get_user_stats(&self, user_id: Uuid) -> Result<UserStats, AppError>;
 
-    async fn list_users(&self) -> Result<Vec<User>, AppError>;
+    async fn list_users(&self, filters: PaginationAndFilters) -> Result<Vec<User>, AppError>;
     async fn update_user_role(&self, id: Uuid, update: UserRoleUpdate) -> Result<User, AppError>;
     async fn delete_user(&self, id: Uuid) -> Result<(), AppError>;
 
@@ -37,6 +38,7 @@ impl From<UserEntity::Model> for User {
             is_guest: model.is_guest,
             name: model.name,
             avatar_url: model.avatar_url,
+            password_hash: model.password_hash,
             preferred_language: model.preferred_language,
             theme: model.theme,
             role: model.role,
@@ -73,6 +75,7 @@ impl UserRepository for UserRepositoryImpl {
             is_guest: Set(is_guest),
             name: Set(user.name),
             avatar_url: Set(user.avatar_url),
+            password_hash: Set(user.password_hash),
             created_at: Set(Utc::now()),
             updated_at: Set(Utc::now()),
             ..Default::default()
@@ -118,12 +121,21 @@ impl UserRepository for UserRepositoryImpl {
         })
     }
 
-    async fn list_users(&self) -> Result<Vec<User>, AppError> {
-        let users = UserEntity::Entity::find()
-            .order_by_desc(UserEntity::Column::CreatedAt)
-            .all(&self.db)
-            .await?;
+    async fn list_users(&self, filters: PaginationAndFilters) -> Result<Vec<User>, AppError> {
+        let mut query = UserEntity::Entity::find().order_by_desc(UserEntity::Column::CreatedAt);
 
+        if let Some(search) = filters.search {
+            query = query.filter(UserEntity::Column::Name.contains(&search));
+        }
+        if let Some(role) = filters.role {
+            query = query.filter(UserEntity::Column::Role.eq(role));
+        }
+
+        let limit = filters.limit.unwrap_or(50);
+        let page = filters.page.unwrap_or(1).max(1);
+        let offset = (page - 1) * limit;
+
+        let users = query.limit(limit).offset(offset).all(&self.db).await?;
         Ok(users.into_iter().map(User::from).collect())
     }
 

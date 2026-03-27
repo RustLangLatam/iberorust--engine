@@ -15,6 +15,7 @@ pub struct Model {
     pub preferred_language: Option<String>,
     pub theme: Option<String>,
     pub role: String,
+    pub password_hash: Option<String>,
     pub created_at: DateTimeUtc,
     pub updated_at: DateTimeUtc,
 }

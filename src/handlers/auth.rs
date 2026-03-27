@@ -8,8 +8,17 @@ pub fn routes() -> Router<crate::state::SharedState> {
     Router::new()
         .route("/google", post(google_login))
         .route("/guest", post(guest_login))
+        .route("/login", post(login))
 }
 use validator::Validate;
+
+#[derive(Deserialize, Validate, ToSchema)]
+pub struct LoginRequest {
+    #[validate(email(message = "Invalid email format"))]
+    pub email: String,
+    #[validate(length(min = 1, message = "Password is required"))]
+    pub password: String,
+}
 
 #[derive(Deserialize, Validate, ToSchema)]
 pub struct GoogleLoginRequest {
@@ -49,5 +58,23 @@ pub async fn google_login(
 )]
 pub async fn guest_login(State(state): State<SharedState>) -> Result<Json<AuthResponse>, AppError> {
     let token = state.auth_service.login_guest().await?;
+    Ok(Json(AuthResponse { token }))
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/auth/login",
+    request_body = LoginRequest,
+    responses(
+        (status = 200, description = "Successful login", body = AuthResponse)
+    ),
+    tag = "Auth"
+)]
+pub async fn login(
+    State(state): State<SharedState>,
+    Json(payload): Json<LoginRequest>,
+) -> Result<Json<AuthResponse>, AppError> {
+    payload.validate().map_err(|e| AppError::ValidationError(e.to_string()))?;
+    let token = state.auth_service.login_standard(&payload.email, &payload.password).await?;
     Ok(Json(AuthResponse { token }))
 }

@@ -38,6 +38,7 @@ impl From<UserEntity::Model> for User {
             is_guest: model.is_guest,
             name: model.name,
             avatar_url: model.avatar_url,
+            password_hash: model.password_hash,
             preferred_language: model.preferred_language,
             theme: model.theme,
             role: model.role,
@@ -74,6 +75,7 @@ impl UserRepository for UserRepositoryImpl {
             is_guest: Set(is_guest),
             name: Set(user.name),
             avatar_url: Set(user.avatar_url),
+            password_hash: Set(user.password_hash),
             created_at: Set(Utc::now()),
             updated_at: Set(Utc::now()),
             ..Default::default()

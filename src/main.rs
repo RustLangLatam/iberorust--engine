@@ -31,6 +31,7 @@ use sea_orm::Set;
     paths(
         handlers::auth::google_login,
         handlers::auth::guest_login,
+        handlers::auth::login,
         handlers::user::get_me,
         handlers::user::update_me,
         handlers::user::get_stats,
@@ -127,6 +128,7 @@ use sea_orm::Set;
             models::contact::Inquiry,
             models::contact::SubmitInquiryRequest,
             handlers::auth::GoogleLoginRequest,
+            handlers::auth::LoginRequest,
             handlers::auth::AuthResponse,
             handlers::sandbox::ExecuteCodeRequest,
             handlers::sandbox::ExecuteCodeResponse,
@@ -176,15 +178,10 @@ async fn seed_admin_user(db: &sea_orm::DatabaseConnection) -> Result<(), Box<dyn
 
         let salt = SaltString::generate(&mut OsRng);
         let argon2 = Argon2::default();
-        let _password_hash = argon2
+        let password_hash = argon2
             .hash_password(default_password.as_bytes(), &salt)
             .map_err(|e| anyhow::anyhow!("Argon2 hash failed: {}", e))?
             .to_string();
-
-        // Assuming there might be a password column, although UserEntity currently
-        // doesn't define it in models/entities based on exploration, it is often tied
-        // to Google auth or external login. If standard password auth isn't natively
-        // stored in DB for now, we still create the user with role 'ADMIN'.
 
         let new_user = UserEntity::ActiveModel {
             id: Set(Uuid::new_v4()),
@@ -193,13 +190,12 @@ async fn seed_admin_user(db: &sea_orm::DatabaseConnection) -> Result<(), Box<dyn
             is_guest: Set(false),
             name: Set("System Admin".to_string()),
             avatar_url: Set(None),
+            password_hash: Set(Some(password_hash)),
             preferred_language: Set(Some("EN".to_string())),
             theme: Set(Some("system".to_string())),
             role: Set("ADMIN".to_string()),
             created_at: Set(Utc::now()),
             updated_at: Set(Utc::now()),
-            // If password column exists, set it. For now, creating the user ensures it is recognized by role.
-            // ..Default::default()
         };
 
         new_user.insert(db).await?;

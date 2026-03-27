@@ -1,0 +1,309 @@
+{
+  "id": "rust-macros",
+  "slug": "rust-macros",
+  "title": {
+    "EN": "Metaprogramming & Macros",
+    "ES": "Metaprogramación y Macros"
+  },
+  "description": {
+    "EN": "Master the art of code generation. From macro_rules! to advanced procedural macros using Syn and Quote.",
+    "ES": "Domina el arte de la generación de código. Desde macro_rules! hasta macros procedimentales avanzadas usando Syn y Quote."
+  },
+  "level": "Advanced",
+  "tags": [
+    "Macros",
+    "Metaprogramming",
+    "Syn",
+    "Quote"
+  ],
+  "thumbnail": "https://placehold.co/800x500/A020F0/FFFFFF/png?text=Rust+Macros&font=roboto",
+  "modules": [
+    {
+      "id": "mod-macro-1",
+      "title": {
+        "EN": "1. Declarative Macros",
+        "ES": "1. Macros Declarativas"
+      },
+      "chapters": [
+        {
+          "id": "chap-macro-1-1",
+          "courseId": "rust-macros",
+          "order": 1,
+          "type": "concept",
+          "title": {
+            "EN": "Introduction to macro_rules!",
+            "ES": "Introducción a macro_rules!"
+          },
+          "hasVideo": true,
+          "content": {
+            "EN": "# The Power of Metaprogramming\n\nMacros are code that writes other code. This is called **Metaprogramming**. In Rust, macros are distinct from functions:\n1.  **Time**: Macros expand at *compile time* (before the binary is built). Functions run at *runtime*.\n2.  **Args**: Functions accept specific types. Macros accept a stream of source code tokens.\n\n## Declarative Macros\nAlso known as \"macros by example\". They look like `match` expressions. You define a pattern, and if the input code matches that pattern, the macro replaces it with the code block you defined.\n\n## Syntax\n```rust\nmacro_rules! name {\n    (PATTERN) => { EXPANSION };\n}\n```\nWe use specific designators to match types of tokens:\n*   `$x:expr`: Matches an expression (e.g., `5 + 5`).\n*   `$x:ident`: Matches an identifier (variable name).\n*   `$x:ty`: Matches a Type.",
+            "ES": "# El Poder de la Metaprogramación\n\nLas macros son código que escribe otro código. Esto se llama **Metaprogramación**. En Rust, son distintas a las funciones:\n1.  **Tiempo**: Las macros se expanden en *tiempo de compilación* (antes de construir el binario). Las funciones corren en *runtime*.\n2.  **Argumentos**: Las funciones aceptan tipos específicos. Las macros aceptan un flujo de tokens de código fuente.\n\n## Macros Declarativas\nConocidas como \"macros por ejemplo\". Se parecen a expresiones `match`. Defines un patrón, y si el código de entrada coincide, la macro lo reemplaza con el bloque de código definido.\n\n## Sintaxis\n```rust\nmacro_rules! nombre {\n    (PATRON) => { EXPANSION };\n}\n```\nUsamos designadores específicos para coincidir tipos de tokens:\n*   `$x:expr`: Coincide con una expresión (ej. `5 + 5`).\n*   `$x:ident`: Coincide con un identificador (nombre de variable).\n*   `$x:ty`: Coincide con un Tipo."
+          },
+          "codeSnippet": "macro_rules! say_hello {\n    // Matches no arguments\n    () => {\n        println!(\"Hello!\");\n    };\n    // Matches one expression argument\n    ($name:expr) => {\n        println!(\"Hello, {}!\", $name);\n    };\n}\n\nfn main() {\n    say_hello!();\n    say_hello!(\"Rustacean\");\n}"
+        },
+        {
+          "id": "chap-macro-1-2",
+          "courseId": "rust-macros",
+          "order": 2,
+          "type": "concept",
+          "title": {
+            "EN": "Repetition & Hygiene",
+            "ES": "Repetición e Higiene"
+          },
+          "content": {
+            "EN": "# Repetition\n        \nOften you want a macro to accept a variable number of arguments (like `vec![1, 2, 3]`).\nWe use the syntax `$(...)*` to indicate repetition.\n*   `$(...),*`: Repeat, separated by commas.\n*   `$(...);*`: Repeat, separated by semicolons.\n\n## Hygiene\nDeclarative macros in Rust are **partially hygienic**. This means strict rules prevent variable shadowing issues.\n*   A variable defined *inside* the macro usually cannot conflict with a variable defined *outside*.\n*   However, generic types and lifetimes can sometimes leak if not handled carefully.\n\n## Debugging\nTo see what your macro expands to, you can use the command:\n`cargo expand` (requires installing `cargo-expand`).",
+            "ES": "# Repetición\n        \nA menudo quieres que una macro acepte un número variable de argumentos (como `vec![1, 2, 3]`).\nUsamos la sintaxis `$(...)*` para indicar repetición.\n*   `$(...),*`: Repetir, separado por comas.\n*   `$(...);*`: Repetir, separado por punto y coma.\n\n## Higiene\nLas macros declarativas en Rust son **parcialmente higiénicas**. Reglas estrictas previenen problemas de shadowing.\n*   Una variable definida *dentro* de la macro usualmente no puede entrar en conflicto con una *fuera*.\n*   Sin embargo, tipos genéricos y lifetimes pueden fugarse si no se tiene cuidado.\n\n## Debugging\nPara ver en qué se expande tu macro, usa el comando:\n`cargo expand` (requiere instalar `cargo-expand`)."
+          },
+          "codeSnippet": "macro_rules! create_map {\n    // Match keys ($k) and values ($v), separated by =>, \n    // and the whole pair separated by commas\n    ( $( $k:expr => $v:expr ),* ) => {\n        {\n            let mut map = std::collections::HashMap::new();\n            $(\n                map.insert($k, $v);\n            )*\n            map\n        }\n    };\n}\n\nfn main() {\n    let scores = create_map!(\n        \"Blue\" => 10,\n        \"Red\" => 50,\n        \"Green\" => 20\n    );\n    \n    println!(\"Scores: {:?}\", scores);\n}"
+        },
+        {
+          "id": "chap-macro-1-quiz",
+          "courseId": "rust-macros",
+          "order": 3,
+          "type": "quiz",
+          "title": {
+            "EN": "Quiz: Declarative Macros",
+            "ES": "Quiz: Macros Declarativas"
+          },
+          "content": {
+            "EN": "Check your macro_rules! knowledge.",
+            "ES": "Verifica tu conocimiento de macro_rules!."
+          },
+          "quizData": [
+            {
+              "id": "q-mac-1",
+              "question": {
+                "EN": "When are macros expanded?",
+                "ES": "¿Cuándo se expanden las macros?"
+              },
+              "options": {
+                "EN": [
+                  "Runtime",
+                  "Compile Time",
+                  "Link Time"
+                ],
+                "ES": [
+                  "Runtime",
+                  "Tiempo de Compilación",
+                  "Tiempo de Enlazado"
+                ]
+              },
+              "correctIndex": 1,
+              "explanation": {
+                "EN": "Macros generate Rust code before the compiler builds the binary.",
+                "ES": "Las macros generan código Rust antes de que el compilador construya el binario."
+              }
+            },
+            {
+              "id": "q-mac-2",
+              "question": {
+                "EN": "Which designator matches a type (like i32)?",
+                "ES": "¿Qué designador coincide con un tipo (como i32)?"
+              },
+              "options": {
+                "EN": [
+                  "$x:expr",
+                  "$x:ident",
+                  "$x:ty"
+                ],
+                "ES": [
+                  "$x:expr",
+                  "$x:ident",
+                  "$x:ty"
+                ]
+              },
+              "correctIndex": 2,
+              "explanation": {
+                "EN": "`ty` is for Types, `expr` for Expressions, `ident` for identifiers.",
+                "ES": "`ty` es para Tipos, `expr` para Expresiones, `ident` para identificadores."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mod-macro-2",
+      "title": {
+        "EN": "2. Proc-Macros & Derive",
+        "ES": "2. Proc-Macros y Derive"
+      },
+      "chapters": [
+        {
+          "id": "chap-macro-2-1",
+          "courseId": "rust-macros",
+          "order": 1,
+          "type": "concept",
+          "title": {
+            "EN": "Procedural Macros Architecture",
+            "ES": "Arquitectura de Macros Procedimentales"
+          },
+          "content": {
+            "EN": "# Procedural Macros\n\nUnlike declarative macros (which match patterns), procedural macros are functions that accept a **TokenStream** as input and return a new **TokenStream** as output. You are literally writing a compiler plugin.\n\n## The Architecture\n1.  **Separate Crate**: Proc-macros *must* live in their own crate with `proc-macro = true` in `Cargo.toml`.\n2.  **Input**: The source code (tokens) the macro is attached to.\n3.  **Output**: Valid Rust code (tokens) that replaces or augments the input.\n\n## The Holy Trinity\nTo write proc-macros effectively, we use three crates (referenced from developerlife.com):\n1.  **proc_macro** (std): The compiler's interface types.\n2.  **syn**: Parses the TokenStream into a manipulatable AST (Abstract Syntax Tree).\n3.  **quote**: Generates TokenStreams efficiently using a macro syntax.",
+            "ES": "# Macros Procedimentales\n\nA diferencia de las declarativas (que coinciden patrones), las macros procedimentales son funciones que aceptan un **TokenStream** de entrada y retornan un nuevo **TokenStream** de salida. Estás escribiendo literalmente un plugin del compilador.\n\n## La Arquitectura\n1.  **Crate Separado**: Las proc-macros *deben* vivir en su propio crate con `proc-macro = true`.\n2.  **Entrada**: El código fuente (tokens) al que se adjunta la macro.\n3.  **Salida**: Código Rust válido (tokens) que reemplaza o aumenta la entrada.\n\n## La Santa Trinidad\nPara escribir proc-macros efectivamente, usamos tres crates:\n1.  **proc_macro** (std): Tipos de interfaz del compilador.\n2.  **syn**: Parsea el TokenStream a un AST manipulable.\n3.  **quote**: Genera TokenStreams eficientemente."
+          },
+          "codeSnippet": "// Example structure of a proc-macro lib.rs\n/*\nuse proc_macro::TokenStream;\nuse quote::quote;\nuse syn::{parse_macro_input, DeriveInput};\n\n#[proc_macro_derive(HelloMacro)]\npub fn hello_macro_derive(input: TokenStream) -> TokenStream {\n    // 1. Parse the input (The Struct)\n    let ast = parse_macro_input!(input as DeriveInput);\n\n    // 2. Generate code (impl HelloMacro for Struct...)\n    let gen = impl_hello_macro(&ast);\n\n    // 3. Return tokens\n    gen.into()\n}\n*/\n\nfn main() {\n    println!(\"Proc-macros require a separate crate type definition.\");\n}"
+        },
+        {
+          "id": "chap-macro-2-2",
+          "courseId": "rust-macros",
+          "order": 2,
+          "type": "concept",
+          "title": {
+            "EN": "Derive Macros",
+            "ES": "Macros Derive"
+          },
+          "content": {
+            "EN": "# The Derive Macro\n\nThis is the most common type (e.g., `#[derive(Debug, Serialize)]`). It creates new code *alongside* the struct or enum; it does not modify the original item.\n\n## How it works (The `syn` crate)\nWhen you put `#[derive(MyTrait)]` on a struct, your macro receives the *entire struct definition* as tokens.\n1.  Use `syn` to parse it into a `DeriveInput`.\n2.  Extract the struct name (`ident`).\n3.  Use `quote!` to generate an `impl MyTrait for StructName { ... }` block.\n\n## Quote Crate\nThe `quote!` macro lets you write Rust code inside your Rust code. It supports variable interpolation using `#variable`.",
+            "ES": "# La Macro Derive\n\nEs el tipo más común (ej. `#[derive(Debug, Serialize)]`). Crea nuevo código *junto* al struct o enum; no modifica el ítem original.\n\n## Cómo funciona (El crate `syn`)\nCuando pones `#[derive(MyTrait)]` en un struct, tu macro recibe la *definición entera del struct* como tokens.\n1.  Usa `syn` para parsearlo a un `DeriveInput`.\n2.  Extrae el nombre del struct (`ident`).\n3.  Usa `quote!` para generar un bloque `impl MyTrait for NombreStruct { ... }`.\n\n## Crate Quote\nLa macro `quote!` te permite escribir código Rust dentro de tu código Rust. Soporta interpolación de variables usando `#variable`."
+          },
+          "codeSnippet": "// Imaginary implementation of #[derive(Hello)]\n/*\nlet name = &ast.ident; // The struct name (e.g., \"User\")\n\n// quote! returns a TokenStream\nlet output = quote! {\n    impl Hello for #name {\n        fn hello() {\n            println!(\"Hello, I am {}!\", stringify!(#name));\n        }\n    }\n};\n*/\n\nfn main() {\n    // User usage:\n    // #[derive(Hello)]\n    // struct User;\n    \n    // User::hello(); -> \"Hello, I am User!\"\n}"
+        },
+        {
+          "id": "chap-macro-2-quiz",
+          "courseId": "rust-macros",
+          "order": 3,
+          "type": "quiz",
+          "title": {
+            "EN": "Quiz: Proc-Macros",
+            "ES": "Quiz: Proc-Macros"
+          },
+          "content": {
+            "EN": "Understanding the basics of procedural macros.",
+            "ES": "Entendiendo los básicos de macros procedimentales."
+          },
+          "quizData": [
+            {
+              "id": "q-proc-1",
+              "question": {
+                "EN": "What trait represents the raw source code input?",
+                "ES": "¿Qué trait representa la entrada de código fuente crudo?"
+              },
+              "options": {
+                "EN": [
+                  "String",
+                  "TokenStream",
+                  "AST"
+                ],
+                "ES": [
+                  "String",
+                  "TokenStream",
+                  "AST"
+                ]
+              },
+              "correctIndex": 1,
+              "explanation": {
+                "EN": "Rust provides `TokenStream` to represent the sequence of tokens.",
+                "ES": "Rust provee `TokenStream` para representar la secuencia de tokens."
+              }
+            },
+            {
+              "id": "q-proc-2",
+              "question": {
+                "EN": "Can a Derive macro modify the struct it is placed on?",
+                "ES": "¿Puede una macro Derive modificar el struct en el que se coloca?"
+              },
+              "options": {
+                "EN": [
+                  "Yes",
+                  "No"
+                ],
+                "ES": [
+                  "Sí",
+                  "No"
+                ]
+              },
+              "correctIndex": 1,
+              "explanation": {
+                "EN": "No, Derive macros are append-only. They generate new code but cannot change the original definition. You need Attribute macros for that.",
+                "ES": "No, las macros Derive son solo de adjuntar. Generan código nuevo pero no pueden cambiar la definición original. Necesitas macros de Atributo para eso."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mod-macro-3",
+      "title": {
+        "EN": "3. Attribute & Function-like",
+        "ES": "3. Macros de Atributo y Función"
+      },
+      "chapters": [
+        {
+          "id": "chap-macro-3-1",
+          "courseId": "rust-macros",
+          "order": 1,
+          "type": "concept",
+          "title": {
+            "EN": "Attribute Macros",
+            "ES": "Macros de Atributo"
+          },
+          "content": {
+            "EN": "# Attribute Macros\n\nAttribute macros are defined with `#[proc_macro_attribute]`. They are attached to items like `#[my_macro]` or `#[route(GET, \"/\")]`.\n\n## Power & Responsibility\nUnlike Derive macros, Attribute macros **replace** the item they are attached to.\n*   **Input**: The item (function, struct, etc.) AND the arguments passed to the attribute.\n*   **Output**: Whatever you return replaces the original code.\n\nThis allows you to modify functions completely (e.g., wrapping them in logging code, or registering them in a global list like web frameworks do for routes).\n\n## Example: Logging\nYou could write a `#[log_time]` macro that takes a user's function body, and wraps it in a `std::time::Instant::now()` block.",
+            "ES": "# Macros de Atributo\n\nSe definen con `#[proc_macro_attribute]`. Se adjuntan a ítems como `#[mi_macro]` o `#[route(GET, \"/\")]`.\n\n## Poder y Responsabilidad\nA diferencia de las macros Derive, las de Atributo **reemplazan** el ítem al que se adjuntan.\n*   **Entrada**: El ítem (función, struct, etc.) Y los argumentos pasados al atributo.\n*   **Salida**: Lo que retornes reemplaza el código original.\n\nEsto permite modificar funciones completamente (ej. envolverlas en código de logging, o registrarlas en una lista global como hacen los frameworks web para rutas).\n\n## Ejemplo: Logging\nPodrías escribir una macro `#[log_time]` que tome el cuerpo de la función del usuario y lo envuelva en un bloque `std::time::Instant::now()`."
+          },
+          "codeSnippet": "// Usage:\n// #[log_execution]\n// fn heavy_computation() { ... }\n\n/* Implementation Logic:\n1. Parse input function: fn heavy_computation() { BODY }\n2. Create new body:\n   fn heavy_computation() {\n       let start = Instant::now();\n       { BODY } // Insert original body here\n       println!(\"Time: {:?}\", start.elapsed());\n   }\n*/"
+        },
+        {
+          "id": "chap-macro-3-2",
+          "courseId": "rust-macros",
+          "order": 2,
+          "type": "concept",
+          "title": {
+            "EN": "Function-like Macros",
+            "ES": "Macros tipo Función"
+          },
+          "content": {
+            "EN": "# Function-like Macros\n\nDefined with `#[proc_macro]`. These look like declarative macros (`my_macro!(...)`) but are powered by the full proc-macro engine.\n\n## Use Cases\nThese are useful when you need to define a **Domain Specific Language (DSL)** that doesn't look like standard Rust code.\n*   **SQLx**: `sqlx::query!(\"SELECT * FROM users\")` parses the SQL string at compile time.\n*   **HTML templating**: `html! { <div> \"Hello\" </div> }`.\n\nBecause you control the parsing completely, the tokens inside `!(...)` don't even have to be valid Rust, as long as your parser can handle them and produce valid Rust as output.",
+            "ES": "# Macros tipo Función\n\nDefinidas con `#[proc_macro]`. Se ven como macros declarativas (`mi_macro!(...)`) pero son impulsadas por el motor completo de proc-macro.\n\n## Casos de Uso\nSon útiles cuando necesitas definir un **Lenguaje de Dominio Específico (DSL)** que no parece código Rust estándar.\n*   **SQLx**: `sqlx::query!(\"SELECT * FROM users\")` parsea el string SQL en tiempo de compilación.\n*   **Plantillas HTML**: `html! { <div> \"Hola\" </div> }`.\n\nComo controlas el parsing completamente, los tokens dentro de `!(...)` no tienen que ser siquiera Rust válido, siempre que tu parser pueda manejarlos y producir Rust válido como salida."
+          },
+          "codeSnippet": "// Example: Use SQL inside Rust\n// let users = sql!(\"SELECT * FROM users WHERE active = true\");\n\n/* Logic:\n   The macro receives \"SELECT * FROM...\" as a string literal token.\n   It connects to a DB at compile time to verify columns.\n   It generates Rust code: \n   db.query(\"SELECT...\").map(|row| User { ... })\n*/"
+        }
+      ]
+    },
+    {
+      "id": "mod-macro-4",
+      "title": {
+        "EN": "4. Ecosystem & Testing",
+        "ES": "4. Ecosistema y Testing"
+      },
+      "chapters": [
+        {
+          "id": "chap-macro-4-1",
+          "courseId": "rust-macros",
+          "order": 1,
+          "type": "concept",
+          "title": {
+            "EN": "Parsing with Syn",
+            "ES": "Parseando con Syn"
+          },
+          "content": {
+            "EN": "# Deep Dive into Syn\n\nThe `syn` crate is the de-facto standard for parsing Rust code. It provides ready-made structs for almost every Rust syntax element.\n\n## Common Types\n*   `DeriveInput`: The input for a derive macro (Structs, Enums).\n*   `ItemFn`: Represents a function definition (useful for attribute macros).\n*   `Expr`: Represents an expression.\n*   `Lit`: Represents a literal (string, integer, bool).\n\n## Custom Parsing\nYou can implement the `syn::parse::Parse` trait for your own structs. This allows you to define how a stream of tokens should be converted into your strong types.",
+            "ES": "# Profundizando en Syn\n\nEl crate `syn` es el estándar de facto para parsear código Rust. Provee structs listos para casi todo elemento de sintaxis de Rust.\n\n## Tipos Comunes\n*   `DeriveInput`: La entrada para una macro derive (Structs, Enums).\n*   `ItemFn`: Representa una definición de función (útil para macros de atributo).\n*   `Expr`: Representa una expresión.\n*   `Lit`: Representa un literal (string, entero, bool).\n\n## Parsing Personalizado\nPuedes implementar el trait `syn::parse::Parse` para tus propios structs. Esto te permite definir cómo un flujo de tokens debe convertirse en tus tipos fuertes."
+          },
+          "codeSnippet": "/*\nuse syn::{parse::Parse, parse::ParseStream, Result, Token};\n\nstruct MyArgs {\n    name: String,\n    count: u32,\n}\n\nimpl Parse for MyArgs {\n    fn parse(input: ParseStream) -> Result<Self> {\n        // Expect: \"Name\", 10\n        let name_lit: syn::LitStr = input.parse()?;\n        input.parse::<Token![,]>()?; // Comma\n        let count_lit: syn::LitInt = input.parse()?;\n        \n        Ok(MyArgs {\n            name: name_lit.value(),\n            count: count_lit.base10_parse()?,\n        })\n    }\n}\n*/"
+        },
+        {
+          "id": "chap-macro-4-2",
+          "courseId": "rust-macros",
+          "order": 2,
+          "type": "concept",
+          "title": {
+            "EN": "Testing & Debugging",
+            "ES": "Testing y Debugging"
+          },
+          "content": {
+            "EN": "# Debugging Macros\n\nMacros are notoriously hard to debug because the compiler error points to the macro invocation, not the generated code.\n\n## Tools\n1.  **cargo-expand**: Runs the macro expansion pass and shows you the resulting Rust code file. Extremely useful to check if `quote!` is doing what you think it is.\n2.  **trybuild**: A testing harness for UI tests. It lets you write tests that check if a macro *fails to compile* with a specific error message. This is crucial for providing good developer experience (DX) for users of your macro.\n\n## Best Practices\n*   Keep the macro logic small. Delegate the heavy logic to a standard function if possible.\n*   Always verify inputs explicitly and emit helpful errors using `syn::Error::new_spanned`.",
+            "ES": "# Debugging de Macros\n\nLas macros son notoriamente difíciles de depurar porque el error del compilador apunta a la invocación, no al código generado.\n\n## Herramientas\n1.  **cargo-expand**: Corre el paso de expansión y te muestra el archivo de código Rust resultante. Extremadamente útil para verificar `quote!`.\n2.  **trybuild**: Un arnés de pruebas para UI tests. Te permite escribir pruebas que verifiquen si una macro *falla al compilar* con un mensaje de error específico. Crucial para buena experiencia de desarrollador (DX).\n\n## Buenas Prácticas\n*   Mantén la lógica de la macro pequeña. Delega la lógica pesada a funciones estándar si es posible.\n*   Verifica entradas explícitamente y emite errores útiles con `syn::Error::new_spanned`."
+          },
+          "codeSnippet": "// Example trybuild usage in tests/ui.rs\n\n/*\n#[test]\nfn ui() {\n    let t = trybuild::TestCases::new();\n    t.pass(\"tests/ui/01-successful-invocation.rs\");\n    t.compile_fail(\"tests/ui/02-invalid-syntax.rs\");\n}\n*/\n\nfn main() {\n    println!(\"Testing compile errors is just as important as testing success!\");\n}"
+        }
+      ]
+    }
+  ],
+  "previewCode": "#[derive(MyMacro)]\n#[my_attribute(fast)]\nstruct Data {\n    id: u32,\n    name: String\n}\n\n// Generates:\n// impl MyMacro for Data { ... }",
+  "prerequisites": [
+    "rust-serialization"
+  ]
+}

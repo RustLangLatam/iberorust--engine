@@ -1,0 +1,12 @@
+{
+  "title": {
+    "EN": "Rust API Guidelines",
+    "ES": "Rust API Guidelines"
+  },
+  "description": {
+    "EN": "Best practices for designing idiomatic Rust APIs.",
+    "ES": "Mejores prácticas para diseñar APIs de Rust idiomáticas."
+  },
+  "url": "https://rust-lang.github.io/api-guidelines/",
+  "type": "Best Practices"
+}

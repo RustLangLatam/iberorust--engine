@@ -1,0 +1,12 @@
+{
+  "title": {
+    "EN": "Rust 1.79: What's New?",
+    "ES": "Rust 1.79: ¿Qué hay de nuevo?"
+  },
+  "content": "{\"EN\":\"Inline const expressions, temporary lifetime extension in matches, and stabilization of lazy_cell.\",\"ES\":\"Expresiones const en línea, extensión temporal de lifetime en matches y estabilización de lazy_cell.\"}",
+  "image_url": "https://placehold.co/600x400/CE412B/FFFFFF/png?text=Rust+1.79",
+  "published_at": "2024-05-20T00:00:00.000Z",
+  "tags": [
+    "Release"
+  ]
+}

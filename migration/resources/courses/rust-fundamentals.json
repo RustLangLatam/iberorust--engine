@@ -1,0 +1,1191 @@
+{
+  "id": "rust-fundamentals",
+  "slug": "rust-fundamentals",
+  "title": {
+    "EN": "Rust Fundamentals",
+    "ES": "Fundamentos de Rust"
+  },
+  "description": {
+    "EN": "The complete guide to the Rust programming language. From installation and ownership to advanced concurrency, unsafe code, and cross-compilation.",
+    "ES": "La guía completa del lenguaje de programación Rust. Desde la instalación y ownership hasta concurrencia avanzada, código unsafe y compilación cruzada."
+  },
+  "level": "Beginner",
+  "tags": [
+    "Ownership",
+    "Systems",
+    "CLI",
+    "Low-level",
+    "Embedded"
+  ],
+  "thumbnail": "https://placehold.co/800x500/CE412B/FFFFFF/png?text=Rust+Fundamentals&font=roboto",
+  "modules": [
+    {
+      "id": "rf-mod-1",
+      "title": {
+        "EN": "1. Introduction to Rust",
+        "ES": "1. Introducción a Rust"
+      },
+      "chapters": [
+        {
+          "id": "rf-1-1",
+          "courseId": "rust-fundamentals",
+          "order": 1,
+          "type": "concept",
+          "title": {
+            "EN": "Philosophy & History",
+            "ES": "Filosofía e Historia"
+          },
+          "content": {
+            "EN": "# Origins\nRust started as a personal project by **Graydon Hoare** at Mozilla in 2006. The browser engine **Servo** was the testbed for the language. Version 1.0 was released in 2015, guaranteeing backward compatibility (\"Stability without Stagnation\").\n\n## The Three Pillars\nRust aims to solve the \"Trilemma\" of systems programming:\n1.  **Memory Safety**: Rust guarantees memory safety at compile-time preventing segfaults, dangling pointers, and buffer overflows without a Garbage Collector (GC).\n2.  **Concurrency**: The type system prevents data races. If code compiles, it is free of data races. This is known as \"Fearless Concurrency\".\n3.  **Performance**: Rust uses LLVM as a backend. It features zero-cost abstractions, meaning high-level constructs (like iterators) compile down to the same assembly as hand-written loops.\n\n## Used By\n*   **Linux Kernel**: Since version 6.1, Rust is the second official language of the Kernel.\n*   **Android**: Used for low-level system components (Bluetooth, Keystore) to reduce vulnerabilities.\n*   **AWS/Microsoft/Google**: For critical infrastructure requiring high performance and security.",
+            "ES": "# Orígenes\nRust comenzó como un proyecto personal de **Graydon Hoare** en Mozilla en 2006. El motor de navegador **Servo** fue el banco de pruebas. La versión 1.0 se lanzó en 2015, garantizando retrocompatibilidad (\"Estabilidad sin Estancamiento\").\n\n## Los Tres Pilares\nRust busca resolver el \"Trilema\" de la programación de sistemas:\n1.  **Seguridad de Memoria**: Garantiza seguridad en tiempo de compilación previniendo segfaults, punteros colgantes y desbordamientos de buffer sin usar un Recolector de Basura (GC).\n2.  **Concurrencia**: El sistema de tipos previene condiciones de carrera (data races). Si compila, está libre de ellas. Conocido como \"Concurrencia sin Miedo\".\n3.  **Rendimiento**: Usa LLVM como backend. Posee abstracciones de costo cero; construcciones de alto nivel (como iteradores) compilan al mismo ensamblador que bucles manuales.\n\n## Usado Por\n*   **Kernel de Linux**: Desde la versión 6.1, Rust es el segundo lenguaje oficial del Kernel.\n*   **Android**: Usado para componentes de bajo nivel (Bluetooth, Keystore) para reducir vulnerabilidades.\n*   **AWS/Microsoft/Google**: Para infraestructura crítica que requiere alto rendimiento."
+          },
+          "codeSnippet": "fn main() {\n    // Rust is statically typed and compiled.\n    // This macro prints to stdout.\n    println!(\"Reliability + Performance = Rust\");\n    \n    let year = 2015;\n    println!(\"Stable since {}\", year);\n}"
+        },
+        {
+          "id": "rf-1-2",
+          "courseId": "rust-fundamentals",
+          "order": 2,
+          "type": "concept",
+          "title": {
+            "EN": "Toolchain Internals",
+            "ES": "Internos del Toolchain"
+          },
+          "content": {
+            "EN": "# Rustup: The Multiplexer\nYou don't install `rustc` directly. You use `rustup`, which manages toolchains:\n*   **Channels**: `stable` (every 6 weeks), `beta`, `nightly` (bleeding edge features).\n*   **Targets**: Cross-compilation targets (e.g., `wasm32-unknown-unknown`).\n*   **Overrides**: You can pin a specific directory to use a specific compiler version (`rustup override set nightly`).\n\n## Cargo: The Build System\nCargo handles the entire lifecycle:\n1.  **Dependency Resolution**: Uses `Cargo.toml` (manifest) and `Cargo.lock` (exact versions) to ensure reproducible builds.\n2.  **Compilation**: Invokes `rustc` with correct flags.\n3.  **Testing**: A built-in test runner.\n4.  **Documentation**: `cargo doc` generates HTML docs from comments.\n\n## Profiles\n*   `dev`: Default. Debug symbols enabled, optimizations disabled. Fast compile.\n*   `release`: Optimizations enabled (O3), LTO (Link Time Optimization). Slow compile, fast runtime.",
+            "ES": "# Rustup: El Multiplexor\nNo instalas `rustc` directamente. Usas `rustup`, que gestiona toolchains:\n*   **Canales**: `stable` (cada 6 sem), `beta`, `nightly` (experimental).\n*   **Targets**: Objetivos de compilación cruzada (ej. `wasm32-unknown-unknown`).\n*   **Overrides**: Puedes fijar un directorio específico a una versión del compilador (`rustup override set nightly`).\n\n## Cargo: Sistema de Construcción\nCargo maneja el ciclo de vida completo:\n1.  **Resolución de Dependencias**: Usa `Cargo.toml` (manifiesto) y `Cargo.lock` (versiones exactas) para builds reproducibles.\n2.  **Compilación**: Invoca `rustc` con las banderas correctas.\n3.  **Testing**: Ejecutor de pruebas integrado.\n4.  **Documentación**: `cargo doc` genera HTML desde comentarios.\n\n## Perfiles\n*   `dev`: Por defecto. Símbolos de debug, sin optimización. Compilación rápida.\n*   `release`: Optimizado (O3), LTO. Compilación lenta, ejecución rápida."
+          },
+          "codeSnippet": "// To compile for release:\n// cargo build --release\n\nfn main() {\n    #[cfg(debug_assertions)]\n    println!(\"Running in Debug mode (slower)\");\n\n    #[cfg(not(debug_assertions))]\n    println!(\"Running in Release mode (optimized)\");\n}"
+        },
+        {
+          "id": "rf-1-lab",
+          "courseId": "rust-fundamentals",
+          "order": 3,
+          "type": "quiz",
+          "title": {
+            "EN": "Lab: Ecosystem",
+            "ES": "Lab: Ecosistema"
+          },
+          "content": {
+            "EN": "Verify toolchain mastery.",
+            "ES": "Verifica dominio del toolchain."
+          },
+          "quizData": [
+            {
+              "id": "q1-1",
+              "question": {
+                "EN": "Which file ensures reproducible builds?",
+                "ES": "¿Qué archivo asegura builds reproducibles?"
+              },
+              "options": {
+                "EN": [
+                  "Cargo.toml",
+                  "Cargo.lock",
+                  "rust-toolchain"
+                ],
+                "ES": [
+                  "Cargo.toml",
+                  "Cargo.lock",
+                  "rust-toolchain"
+                ]
+              },
+              "correctIndex": 1,
+              "explanation": {
+                "EN": "Cargo.lock captures the exact hash of every dependency used.",
+                "ES": "Cargo.lock captura el hash exacto de cada dependencia usada."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rf-mod-2",
+      "title": {
+        "EN": "2. Memory & Primitive Types",
+        "ES": "2. Memoria y Tipos Primitivos"
+      },
+      "chapters": [
+        {
+          "id": "rf-2-1",
+          "courseId": "rust-fundamentals",
+          "order": 1,
+          "type": "concept",
+          "title": {
+            "EN": "Scalar Types Internals",
+            "ES": "Internos de Tipos Escalares"
+          },
+          "content": {
+            "EN": "# Deep Dive: Integer Representation\nRust integers have fixed widths. Signed integers (`i8`-`i128`) use **Two's Complement** representation.\n*   **Max Value**: $2^{(n-1)} - 1$\n*   **Min Value**: $-2^{(n-1)}$\n*   **usize/isize**: These are \"pointer-sized\" integers. Their size depends on the target architecture (4 bytes on 32-bit systems, 8 bytes on 64-bit systems). They are required for indexing arrays and vectors because an index cannot exceed the addressable memory space.\n\n## Floating Point (IEEE 754)\nRust follows the IEEE 754-2008 standard for floating-point arithmetic.\n*   `f32`: Single precision. 1 sign bit, 8 exponent bits, 23 mantissa bits.\n*   `f64`: Double precision. 1 sign bit, 11 exponent bits, 52 mantissa bits.\n*   **Warning**: Floats cannot be used as HashMap keys because `NaN != NaN`, breaking the `Eq` trait contract.\n\n## The Boolean Layout\nA `bool` is 1 byte in size, not 1 bit.\n*   Representation: `0x00` (false) and `0x01` (true).\n*   **Safety**: Creating a bool with any other byte value (e.g., via `unsafe` transmutation) is **Undefined Behavior**.\n\n## The Character Type (Unicode Scalar Value)\nUnlike C++ `char` (1 byte) or Java `char` (2 bytes UTF-16), Rust's `char` is **always 4 bytes** (32 bits).\n*   It represents a **Unicode Scalar Value**.\n*   Valid Range: `U+0000` to `U+D7FF` and `U+E000` to `U+10FFFF`.\n*   It explicitly excludes \"Surrogate Pairs\" used in UTF-16.\n*   This makes `char` fundamentally different from `String` (which is UTF-8 encoded bytes).\n\n## Overflow Safety\n*   **Debug Build**: Rust enables overflow checks. Panics on overflow.\n*   **Release Build**: Rust disables checks for performance. Overflow wraps (255 + 1 = 0 for u8).\n*   **Manual Control**: Use `wrapping_add`, `checked_add` (returns Option), or `saturating_add` (stops at MAX) to explicitly define behavior regardless of build profile.",
+            "ES": "# Profundización: Representación de Enteros\nLos enteros en Rust tienen anchos fijos. Los enteros con signo (`i8`-`i128`) usan **Complemento a Dos**.\n*   **Valor Máx**: $2^{(n-1)} - 1$\n*   **Valor Mín**: $-2^{(n-1)}$\n*   **usize/isize**: Enteros del \"tamaño del puntero\". Su tamaño depende de la arquitectura (4 bytes en 32-bit, 8 bytes en 64-bit). Son requeridos para indexar arrays porque un índice no puede exceder el espacio de memoria direccionable.\n\n## Punto Flotante (IEEE 754)\nRust sigue el estándar IEEE 754-2008.\n*   `f32`: Precisión simple. 1 bit signo, 8 exponente, 23 mantisa.\n*   `f64`: Doble precisión. 1 bit signo, 11 exponente, 52 mantisa.\n*   **Advertencia**: Los Floats no pueden ser claves de HashMap porque `NaN != NaN`, rompiendo el contrato del trait `Eq`.\n\n## Layout del Booleano\nUn `bool` ocupa 1 byte, no 1 bit.\n*   Representación: `0x00` (false) y `0x01` (true).\n*   **Seguridad**: Crear un bool con otro valor (ej. vía `unsafe`) es **Comportamiento Indefinido (UB)**.\n\n## El Tipo Carácter (Valor Escalar Unicode)\nA diferencia de C++ `char` (1 byte) o Java `char` (2 bytes UTF-16), el `char` de Rust es **siempre 4 bytes** (32 bits).\n*   Representa un **Valor Escalar Unicode**.\n*   Rango Válido: `U+0000` a `U+D7FF` y `U+E000` a `U+10FFFF`.\n*   Excluye explícitamente \"Pares Sustitutos\" de UTF-16.\n*   Esto lo hace fundamentalmente diferente a `String` (que es UTF-8).\n\n## Seguridad de Desbordamiento (Overflow)\n*   **Debug**: Rust activa chequeos. Pánico si hay overflow.\n*   **Release**: Desactiva chequeos por rendimiento. Hace wrap (255 + 1 = 0 en u8).\n*   **Control Manual**: Usa `wrapping_add`, `checked_add` (retorna Option), o `saturating_add` para definir comportamiento explícito."
+          },
+          "codeSnippet": "fn main() {\n    // Integer overflow handling\n    let a: u8 = 255;\n    \n    // Explicit wrapping (safe in all modes)\n    let wrapped = a.wrapping_add(1); \n    println!(\"Wrapped: {}\", wrapped); // 0\n    \n    // Checked arithmetic (returns Option)\n    match a.checked_add(1) {\n        Some(v) => println!(\"Result: {}\", v),\n        None => println!(\"Overflow detected!\"),\n    }\n    \n    // Char is 4 bytes\n    let heart_cat = '😻';\n    println!(\"Char size: {} bytes\", std::mem::size_of_val(&heart_cat));\n    println!(\"Char value: {:x}\", heart_cat as u32);\n}"
+        },
+        {
+          "id": "rf-2-2",
+          "courseId": "rust-fundamentals",
+          "order": 2,
+          "type": "concept",
+          "title": {
+            "EN": "Alignment & Padding",
+            "ES": "Alineación y Padding"
+          },
+          "content": {
+            "EN": "# Memory Alignment\nCPU reads are efficient when data is aligned to specific addresses (usually multiples of the data size).\n*   A `u32` usually needs 4-byte alignment.\n*   A `u64` usually needs 8-byte alignment.\n\n## Tuple Layout & Padding\nConsider the tuple `t: (u8, u32)`.\n1.  `u8` takes 1 byte.\n2.  `u32` takes 4 bytes, but it **must** start at a memory address multiple of 4.\n3.  The compiler inserts **3 bytes of padding** after the `u8`.\n4.  Total Size = 1 (u8) + 3 (padding) + 4 (u32) = **8 bytes**.\n\nThis explains why reordering fields in structs can save memory (Rust does this automatically for structs, but tuples retain order).\n\n## Zero Sized Types (ZST)\nThe Unit Type `()` occupies **0 bytes** of memory.\nIt exists only at compile time for type checking. Vectors of ZSTs (e.g., `Vec<()>`) allocate no heap memory; they essentially just store a length counter. This allows highly optimized sets like `HashSet<T>` which is just a `HashMap<T, ()>`.",
+            "ES": "# Alineación de Memoria\nLas lecturas del CPU son eficientes cuando los datos están alineados a direcciones específicas.\n*   Un `u32` usualmente requiere alineación de 4 bytes.\n*   Un `u64` usualmente requiere alineación de 8 bytes.\n\n## Layout de Tuplas y Padding\nConsidera la tupla `t: (u8, u32)`.\n1.  `u8` toma 1 byte.\n2.  `u32` toma 4 bytes, pero **debe** iniciar en una dirección múltiplo de 4.\n3.  El compilador inserta **3 bytes de padding (relleno)** después del `u8`.\n4.  Tamaño Total = 1 (u8) + 3 (padding) + 4 (u32) = **8 bytes**.\n\nEsto explica por qué reordenar campos en structs puede ahorrar memoria.\n\n## Tipos de Tamaño Cero (ZST)\nEl Tipo Unidad `()` ocupa **0 bytes**.\nExiste solo en compilación. Vectores de ZSTs (ej. `Vec<()>`) no asignan memoria en el heap; esencialmente solo guardan un contador de longitud. Esto permite optimizaciones como `HashSet<T>` que es internamente `HashMap<T, ()>`."
+          },
+          "codeSnippet": "use std::mem;\n\nfn main() {\n    // Alignment demonstration\n    let tuple: (u8, u32) = (1, 100);\n    \n    // Size is NOT 1 + 4 = 5. It is 8 due to padding.\n    println!(\"Size of (u8, u32): {} bytes\", mem::size_of_val(&tuple));\n    \n    // ZST (Zero Sized Type)\n    let unit: () = ();\n    println!(\"Size of unit: {} bytes\", mem::size_of_val(&unit));\n    \n    let array_of_units = [(); 1000];\n    println!(\"Size of [(); 1000]: {} bytes\", mem::size_of_val(&array_of_units));\n}"
+        },
+        {
+          "id": "rf-2-lab",
+          "courseId": "rust-fundamentals",
+          "order": 3,
+          "type": "quiz",
+          "title": {
+            "EN": "Lab: Memory Internals",
+            "ES": "Lab: Internos de Memoria"
+          },
+          "content": {
+            "EN": "Test your understanding of memory layout.",
+            "ES": "Prueba tu entendimiento del layout de memoria."
+          },
+          "quizData": [
+            {
+              "id": "q2-1",
+              "question": {
+                "EN": "What is the size of `(u8, u16)` on most architectures?",
+                "ES": "¿Cuál es el tamaño de `(u8, u16)` en la mayoría de arquitecturas?"
+              },
+              "options": {
+                "EN": [
+                  "3 bytes",
+                  "4 bytes",
+                  "2 bytes"
+                ],
+                "ES": [
+                  "3 bytes",
+                  "4 bytes",
+                  "2 bytes"
+                ]
+              },
+              "correctIndex": 1,
+              "explanation": {
+                "EN": "1 byte (u8) + 1 byte (padding) + 2 bytes (u16) = 4 bytes to satisfy u16 alignment.",
+                "ES": "1 byte (u8) + 1 byte (padding) + 2 bytes (u16) = 4 bytes para satisfacer la alineación de u16."
+              }
+            },
+            {
+              "id": "q2-2",
+              "question": {
+                "EN": "Does `char` in Rust support UTF-16 surrogates?",
+                "ES": "¿Soporta `char` en Rust surrogates UTF-16?"
+              },
+              "options": {
+                "EN": [
+                  "Yes",
+                  "No"
+                ],
+                "ES": [
+                  "Sí",
+                  "No"
+                ]
+              },
+              "correctIndex": 1,
+              "explanation": {
+                "EN": "No, `char` represents a valid Unicode Scalar Value, excluding surrogates.",
+                "ES": "No, `char` representa un Valor Escalar Unicode válido, excluyendo surrogates."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rf-mod-3",
+      "title": {
+        "EN": "3. Control Flow & Patterns",
+        "ES": "3. Flujo de Control y Patrones"
+      },
+      "chapters": [
+        {
+          "id": "rf-3-1",
+          "courseId": "rust-fundamentals",
+          "order": 1,
+          "type": "concept",
+          "title": {
+            "EN": "Expression-Oriented Design",
+            "ES": "Diseño Orientado a Expresiones"
+          },
+          "content": {
+            "EN": "# Everything is an Expression\nIn Rust, the distinction between statements and expressions is paramount.\n*   **Expressions**: Evaluate to a value. `5`, `x + 1`, `if ...`, `loop ...`, `{ ... }`.\n*   **Statements**: Instructions ending in `;`. They return the Unit type `()`.\n\nThis allows powerful composition. You can assign the result of a block directly to a variable.\n```rust\nlet y = {\n    let x = 3;\n    x + 1 // No semicolon = return value\n};\n```\n\n## Diverging Functions (Never Type `!`)\nControl flow constructs like `return`, `break`, and `panic!` evaluate to the **Never type** (denoted as `!`). \nSince `!` can never effectively exist at runtime, it can be coerced into *any* type. This is why you can use `break` or `panic!` in a match arm that expects an integer; the compiler knows that code path never returns a value, so type safety is preserved.",
+            "ES": "# Todo es una Expresión\nEn Rust, la distinción entre sentencias y expresiones es primordial.\n*   **Expresiones**: Evalúan a un valor. `5`, `x + 1`, `if ...`, `loop ...`, `{ ... }`.\n*   **Sentencias**: Instrucciones terminadas en `;`. Retornan el tipo Unidad `()`.\n\nEsto permite composición poderosa. Puedes asignar el resultado de un bloque a una variable.\n\n## Funciones Divergentes (Tipo Never `!`)\nConstrucciones como `return`, `break`, y `panic!` evalúan al **tipo Never** (denotado como `!`).\nComo `!` nunca puede existir efectivamente en runtime, puede ser forzado (coerced) a *cualquier* tipo. Por eso puedes usar `break` o `panic!` en un match que espera un entero; el compilador sabe que ese camino nunca retorna valor."
+          },
+          "codeSnippet": "fn main() {\n    let num = 10;\n    \n    // Block expression\n    let y = {\n        let x = 3;\n        x + num // Returns 13\n    };\n    \n    println!(\"Y: {}\", y);\n\n    // Using the Never type behavior\n    let x: i32 = match y {\n        13 => 100,\n        _ => panic!(\"Unexpected number!\"), // Evaluates to ! which coerces to i32\n    };\n}"
+        },
+        {
+          "id": "rf-3-2",
+          "courseId": "rust-fundamentals",
+          "order": 2,
+          "type": "concept",
+          "title": {
+            "EN": "Loop Mechanics & Optimization",
+            "ES": "Mecánicas y Optimización de Bucles"
+          },
+          "content": {
+            "EN": "# Loops Under the Hood\n\n## The `loop` construct\nThis is the infinite loop primitive. It is distinct from `while true` because the compiler *knows* it doesn't terminate (unless `break` is encountered). This aids flow analysis (e.g., initializing variables).\n*   Can return values: `break value;`.\n\n## The `for` Loop & IntoIterator\nRust's `for` loop is syntactic sugar for the `IntoIterator` trait.\n```rust\nfor x in collection { ... }\n```\nIs roughly desugared to:\n```rust\nlet mut iter = collection.into_iter();\nwhile let Some(x) = iter.next() { ... }\n```\n\n## Range Optimization\nRanges like `0..10` are structs implementing `Iterator`. LLVM is extremely good at optimizing these. A standard `for i in 0..n` loop in Rust often compiles to the exact same assembly as a standard C `for(int i=0; i<n; i++)` loop, employing vectorization (SIMD) where possible.",
+            "ES": "# Bucles Bajo el Capó\n\n## La construcción `loop`\nEs la primitiva de bucle infinito. Distinto a `while true` porque el compilador *sabe* que no termina (a menos que haya `break`). Ayuda al análisis de flujo.\n*   Puede retornar valores: `break valor;`.\n\n## El Bucle `for` e IntoIterator\nEl `for` de Rust es azúcar sintáctica para el trait `IntoIterator`.\nSe desglosa aproximadamente en un `while let Some(x) = iter.next()`.\n\n## Optimización de Rangos\nRangos como `0..10` son structs implementando `Iterator`. LLVM los optimiza extremadamente bien. Un bucle `for i in 0..n` en Rust a menudo compila al mismo ensamblador exacto que un bucle C, empleando vectorización (SIMD) donde es posible."
+          },
+          "codeSnippet": "fn main() {\n    let data = [10, 20, 30];\n    \n    // 'val' is &i32 because .iter() yields references\n    for (idx, val) in data.iter().enumerate() {\n        println!(\"[{}] = {}\", idx, val);\n    }\n    \n    // Loop label\n    'search: for i in 0..5 {\n        for j in 0..5 {\n            if i * j > 6 {\n                println!(\"Breaking at {}*{}\", i, j);\n                break 'search;\n            }\n        }\n    }\n}"
+        },
+        {
+          "id": "rf-3-lab",
+          "courseId": "rust-fundamentals",
+          "order": 3,
+          "type": "quiz",
+          "title": {
+            "EN": "Lab: Control Flow",
+            "ES": "Lab: Flujo de Control"
+          },
+          "content": {
+            "EN": "Deep check on flow concepts.",
+            "ES": "Chequeo profundo de conceptos de flujo."
+          },
+          "quizData": [
+            {
+              "id": "q3-1",
+              "question": {
+                "EN": "What is the type of a `break` or `panic!` statement?",
+                "ES": "¿Cuál es el tipo de una sentencia `break` o `panic!`?"
+              },
+              "options": {
+                "EN": [
+                  "() (Unit)",
+                  "! (Never)",
+                  "bool"
+                ],
+                "ES": [
+                  "() (Unidad)",
+                  "! (Never)",
+                  "bool"
+                ]
+              },
+              "correctIndex": 1,
+              "explanation": {
+                "EN": "It evaluates to the Never type `!`, which can be coerced into any other type.",
+                "ES": "Evalúa al tipo Never `!`, que puede ser forzado a cualquier otro tipo."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rf-mod-4",
+      "title": {
+        "EN": "4. Complex Data Types",
+        "ES": "4. Tipos de Datos Complejos"
+      },
+      "chapters": [
+        {
+          "id": "rf-4-1",
+          "courseId": "rust-fundamentals",
+          "order": 1,
+          "type": "concept",
+          "title": {
+            "EN": "Struct Layout & Optimization",
+            "ES": "Layout de Structs y Optimización"
+          },
+          "content": {
+            "EN": "# Struct Memory Layout\nIn C/C++, fields in a struct are laid out in memory exactly in the order they are defined.\nIn Rust, by default (`#[repr(Rust)]`), the compiler **reorders fields** to minimize padding and reduce size.\n\nExample:\n```rust\nstruct A {\n    a: u8,  // 1 byte\n    b: u32, // 4 bytes (needs alignment)\n    c: u8,  // 1 byte\n}\n```\n*   **C-Style**: u8 + 3 pad + u32 + u8 + 3 pad = **12 bytes**.\n*   **Rust**: u32 + u8 + u8 + 2 pad = **8 bytes**. Rust moves `b` to the start or end to align efficiently.\n\n## Field Visibility\nBy default, fields are private. You must use `pub` per field to make them accessible outside the defining module.\n\n## Tuple Structs (Newtype Pattern)\n`struct Meters(u32);`.\nUsed to create strict type boundaries. It allows the compiler to prevent you from adding `Meters` to `Seconds`, even though both are `u32` in memory. Zero-cost safety.",
+            "ES": "# Layout de Memoria de Structs\nEn C/C++, los campos están en orden de definición.\nEn Rust, por defecto (`#[repr(Rust)]`), el compilador **reordena los campos** para minimizar el padding.\n\nEjemplo:\n```rust\nstruct A {\n    a: u8,  // 1 byte\n    b: u32, // 4 bytes (necesita alineación)\n    c: u8,  // 1 byte\n}\n```\n*   **Estilo C**: u8 + 3 pad + u32 + u8 + 3 pad = **12 bytes**.\n*   **Rust**: u32 + u8 + u8 + 2 pad = **8 bytes**. Rust mueve `b` para alinear eficientemente.\n\n## Patrón Newtype\n`struct Metros(u32);`.\nUsado para crear límites de tipo estrictos. Permite al compilador prevenir que sumes `Metros` con `Segundos`, aunque ambos sean `u32`. Seguridad de costo cero."
+          },
+          "codeSnippet": "use std::mem;\n\nstruct Optimized {\n    a: u8,\n    b: u64,\n    c: u8,\n}\n\n// Prevents reordering\n#[repr(C)]\nstruct Unoptimized {\n    a: u8,\n    b: u64,\n    c: u8,\n}\n\nfn main() {\n    println!(\"Rust Optimized Size: {}\", mem::size_of::<Optimized>()); // Likely 16 (8 + 1+1+6pad)\n    println!(\"C Unoptimized Size: {}\", mem::size_of::<Unoptimized>()); // Likely 24 (1+7pad + 8 + 1+7pad)\n}"
+        },
+        {
+          "id": "rf-4-2",
+          "courseId": "rust-fundamentals",
+          "order": 2,
+          "type": "concept",
+          "title": {
+            "EN": "Enum Internals & NPO",
+            "ES": "Internos de Enum y NPO"
+          },
+          "content": {
+            "EN": "# Algebraic Data Types (Enums)\nRust Enums are Sum Types. Size = Size of largest variant + Discriminant (tag).\n\n## Discriminant\nAn integer tag used to determine which variant is active. Usually 1 byte, but can be larger if alignment requires it.\n\n## Null Pointer Optimization (NPO)\nThis is a critical optimization.\nConsider `Option<Box<i32>>`.\n*   `Box<i32>` is a pointer (cannot be null, non-zero).\n*   `Option::None` needs a way to be represented.\n*   Rust uses the \"0\" address to represent `None`.\n*   Therefore, `Option<Box<i32>>` takes **exactly the same space** as `Box<i32>`. There is no extra memory cost for the Option wrapper. This works for references `&T`, `Vec`, `String`, and `NonZero*` types.",
+            "ES": "# Tipos de Datos Algebraicos (Enums)\nTamaño = Tamaño de la variante más grande + Discriminante (tag).\n\n## Discriminante\nUn tag entero usado para determinar la variante activa. Usualmente 1 byte.\n\n## Optimización de Puntero Nulo (NPO)\nUna optimización crítica.\nConsidera `Option<Box<i32>>`.\n*   `Box<i32>` es un puntero (no puede ser null, no-cero).\n*   `Option::None` necesita representarse.\n*   Rust usa la dirección \"0\" para representar `None`.\n*   Por tanto, `Option<Box<i32>>` ocupa **exactamente el mismo espacio** que `Box<i32>`. Sin costo extra de memoria."
+          },
+          "codeSnippet": "use std::mem;\n\nenum MyOption<T> {\n    Some(T),\n    None,\n}\n\nfn main() {\n    // Standard pointer\n    println!(\"Box<i32>: {}\", mem::size_of::<Box<i32>>());\n    \n    // Optimized Option (NPO)\n    println!(\"Option<Box<i32>>: {}\", mem::size_of::<Option<Box<i32>>>());\n    \n    // Unoptimized (u8 can be 0, so no NPO possible)\n    println!(\"Option<u8>: {}\", mem::size_of::<Option<u8>>()); // 1 byte val + 1 byte tag\n}"
+        },
+        {
+          "id": "rf-4-lab",
+          "courseId": "rust-fundamentals",
+          "order": 3,
+          "type": "quiz",
+          "title": {
+            "EN": "Lab: Types Layout",
+            "ES": "Lab: Layout de Tipos"
+          },
+          "content": {
+            "EN": "Check memory layout knowledge.",
+            "ES": "Revisa conocimiento de layout de memoria."
+          },
+          "quizData": [
+            {
+              "id": "q4-1",
+              "question": {
+                "EN": "Does `Option<&i32>` use more memory than `&i32`?",
+                "ES": "¿Usa `Option<&i32>` más memoria que `&i32`?"
+              },
+              "options": {
+                "EN": [
+                  "Yes",
+                  "No"
+                ],
+                "ES": [
+                  "Sí",
+                  "No"
+                ]
+              },
+              "correctIndex": 1,
+              "explanation": {
+                "EN": "No, thanks to Null Pointer Optimization, `None` is represented as the null address.",
+                "ES": "No, gracias a la Optimización de Puntero Nulo, `None` se representa como dirección nula."
+              }
+            },
+            {
+              "id": "q4-2",
+              "question": {
+                "EN": "Why does Rust reorder struct fields?",
+                "ES": "¿Por qué Rust reordena campos de structs?"
+              },
+              "options": {
+                "EN": [
+                  "Alphabetical sorting",
+                  "To reduce padding/size",
+                  "Randomly"
+                ],
+                "ES": [
+                  "Orden alfabético",
+                  "Para reducir padding/tamaño",
+                  "Aleatoriamente"
+                ]
+              },
+              "correctIndex": 1,
+              "explanation": {
+                "EN": "It packs smaller types together to satisfy alignment rules efficiently.",
+                "ES": "Empaqueta tipos pequeños juntos para satisfacer reglas de alineación eficientemente."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rf-mod-5",
+      "title": {
+        "EN": "5. Functions & Error Handling",
+        "ES": "5. Funciones y Manejo de Errores"
+      },
+      "chapters": [
+        {
+          "id": "rf-5-1",
+          "courseId": "rust-fundamentals",
+          "order": 1,
+          "type": "concept",
+          "title": {
+            "EN": "Result Internals & The ? Operator",
+            "ES": "Internos de Result y el Operador ?"
+          },
+          "content": {
+            "EN": "# The Result Enum\n```rust\nenum Result<T, E> {\n    Ok(T),\n    Err(E),\n}\n```\nIt works like any other enum. `#[must_use]` attribute forces you to handle it (compilation warning if ignored).\n\n## The `?` Operator (Propagate)\nSyntactic sugar for error propagation.\nIt performs 3 steps:\n1.  Matches the result.\n2.  If `Ok(v)`, extracts `v`.\n3.  If `Err(e)`, calls `From::from(e)` to convert the error into the function's return error type, and returns early.\n\nThis automatic conversion allows you to mix different error types (like IO errors and Parse errors) into a unified application error type seamlessly.\n\n## Unwrapping\n*   `unwrap()`: If Err, calls `panic!` with a generic message.\n*   `expect(\"msg\")`: If Err, calls `panic!` with your message.\nPanicking unwinds the stack (calls destructors/drop) which is safe but expensive. Avoid in loops or libraries.",
+            "ES": "# El Enum Result\nFunciona como cualquier otro enum. El atributo `#[must_use]` te fuerza a manejarlo (aviso de compilación si se ignora).\n\n## El Operador `?` (Propagar)\nAzúcar sintáctica para propagación.\nRealiza 3 pasos:\n1.  Match del resultado.\n2.  Si `Ok(v)`, extrae `v`.\n3.  Si `Err(e)`, llama `From::from(e)` para convertir el error al tipo de error de retorno de la función, y retorna temprano.\n\nEsta conversión automática permite mezclar diferentes tipos de errores (como IO y Parseo) en un tipo de error unificado sin problemas.\n\n## Unwrapping\n*   `unwrap()`: Si Err, pánico con mensaje genérico.\n*   `expect(\"msg\")`: Si Err, pánico con tu mensaje.\nEl pánico desenrolla el stack (llama destructores), lo cual es seguro pero costoso. Evitar en bucles o librerías."
+          },
+          "codeSnippet": "use std::num::ParseIntError;\n\n// Custom function combining logical steps\nfn multiply(first: &str, second: &str) -> Result<i32, ParseIntError> {\n    // ? propagates ParseIntError immediately if parsing fails\n    let n1 = first.parse::<i32>()?;\n    let n2 = second.parse::<i32>()?;\n    \n    Ok(n1 * n2)\n}\n\nfn main() {\n    match multiply(\"10\", \"2\") {\n        Ok(n) => println!(\"Result: {}\", n),\n        Err(e) => println!(\"Error parsing: {}\", e),\n    }\n}"
+        },
+        {
+          "id": "rf-5-2",
+          "courseId": "rust-fundamentals",
+          "order": 2,
+          "type": "concept",
+          "title": {
+            "EN": "Closures & Functional Combinators",
+            "ES": "Closures y Combinadores Funcionales"
+          },
+          "content": {
+            "EN": "# Functional Error Handling\nInstead of verbose `match` statements, Rust provides functional combinators on `Option` and `Result`.\n\n## Combinators\n*   `map`: Transform inner value `T`.\n*   `map_err`: Transform inner error `E`.\n*   `and_then`: (FlatMap) Input is `T`, output is `Result<U, E>`. Used for chaining operations that might fail.\n*   `unwrap_or_else`: Allows providing a closure to calculate a default value only if needed (lazy evaluation).\n\n## Closures in Depth\nClosures `|args| body` are syntactic sugar for structs that implement one of:\n*   `Fn`: Reads environment (Immutable borrow).\n*   `FnMut`: Modifies environment (Mutable borrow).\n*   `FnOnce`: Consumes environment (Move).",
+            "ES": "# Manejo de Errores Funcional\nEn lugar de `match` verbosos, Rust provee combinadores funcionales.\n\n## Combinadores\n*   `map`: Transforma valor interno `T`.\n*   `map_err`: Transforma error interno `E`.\n*   `and_then`: (FlatMap) Entrada es `T`, salida es `Result<U, E>`. Usado para encadenar operaciones que pueden fallar.\n*   `unwrap_or_else`: Permite proveer un closure para calcular valor por defecto solo si es necesario (evaluación perezosa).\n\n## Closures en Profundidad\nLos closures son azúcar sintáctica para structs que implementan:\n*   `Fn`: Lee entorno (Préstamo inmutable).\n*   `FnMut`: Modifica entorno (Préstamo mutable).\n*   `FnOnce`: Consume entorno (Mueve)."
+          },
+          "codeSnippet": "fn main() {\n    let raw = \"42\";\n    \n    // Chain: Parse -> Multiply -> Stringify\n    let res = raw.parse::<i32>()\n        .map(|n| n * 2)\n        .map(|n| format!(\"Number: {}\", n));\n        \n    println!(\"{:?}\", res);\n    \n    // Lazy default\n    let missing: Option<i32> = None;\n    let val = missing.unwrap_or_else(|| {\n        println!(\"Calculating expensive default...\");\n        100\n    });\n}"
+        },
+        {
+          "id": "rf-5-lab",
+          "courseId": "rust-fundamentals",
+          "order": 3,
+          "type": "quiz",
+          "title": {
+            "EN": "Lab: Error Logic",
+            "ES": "Lab: Lógica de Errores"
+          },
+          "content": {
+            "EN": "Check error handling patterns.",
+            "ES": "Chequea patrones de errores."
+          },
+          "quizData": [
+            {
+              "id": "q5-1",
+              "question": {
+                "EN": "What trait allows the `?` operator to convert errors?",
+                "ES": "¿Qué trait permite al operador `?` convertir errores?"
+              },
+              "options": {
+                "EN": [
+                  "Into",
+                  "From",
+                  "Try"
+                ],
+                "ES": [
+                  "Into",
+                  "From",
+                  "Try"
+                ]
+              },
+              "correctIndex": 1,
+              "explanation": {
+                "EN": "It uses `From::from` to convert the error into the return type.",
+                "ES": "Usa `From::from` para convertir el error al tipo de retorno."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rf-mod-6",
+      "title": {
+        "EN": "6. Testing & Debugging",
+        "ES": "6. Pruebas y Depuración"
+      },
+      "chapters": [
+        {
+          "id": "rf-6-1",
+          "courseId": "rust-fundamentals",
+          "order": 1,
+          "type": "concept",
+          "title": {
+            "EN": "Unit & Doc Tests Architecture",
+            "ES": "Arquitectura de Pruebas Unitarias y Doc"
+          },
+          "content": {
+            "EN": "# Unit Tests Structure\nRust supports test-driven development natively.\n*   **Location**: Typically in a `mod tests` inside the same file as the code.\n*   **Visibility**: Using `use super::*;`, tests can access **private** functions of the parent module. This allows white-box testing.\n*   **Compilation**: `#[cfg(test)]` ensures the test module (and its imports/helpers) is completely stripped from the final binary in normal builds. It only exists when running `cargo test`.\n\n## Documentation Tests\nCode blocks in `///` comments are compiled as separate executables.\n*   Ensures docs are never outdated.\n*   Strict: If the example doesn't compile or panics, the test suite fails.\n*   Hidden lines: Lines starting with `#` in doc blocks are hidden from HTML output but run in the test (useful for setup code).",
+            "ES": "# Estructura de Pruebas Unitarias\nRust soporta TDD nativamente.\n*   **Ubicación**: Típicamente en `mod tests` en el mismo archivo.\n*   **Visibilidad**: Usando `use super::*;`, los tests acceden a funciones **privadas**. Permite pruebas de caja blanca.\n*   **Compilación**: `#[cfg(test)]` asegura que el módulo de tests se elimina completamente del binario final. Solo existe al correr `cargo test`.\n\n## Pruebas de Documentación\nBloques de código en comentarios `///` se compilan como ejecutables separados.\n*   Asegura que la documentación no caduque.\n*   Estricto: Si el ejemplo no compila, falla.\n*   Líneas ocultas: Líneas que inician con `#` se ocultan en HTML pero corren en el test (útil para setup)."
+          },
+          "codeSnippet": "// Private function\nfn internal_add(a: i32, b: i32) -> i32 {\n    a + b\n}\n\n/// Adds two numbers.\n/// # Examples\n/// ```\n/// // This setup line is hidden in docs\n/// # let x = 5;\n/// assert_eq!(my_crate::add(x, 5), 10);\n/// ```\npub fn add(a: i32, b: i32) -> i32 {\n    internal_add(a, b)\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn test_internal() {\n        // Can access private 'internal_add'\n        assert_eq!(internal_add(2, 2), 4);\n    }\n}"
+        },
+        {
+          "id": "rf-6-2",
+          "courseId": "rust-fundamentals",
+          "order": 2,
+          "type": "concept",
+          "title": {
+            "EN": "Integration Tests & Tools",
+            "ES": "Pruebas de Integración y Herramientas"
+          },
+          "content": {
+            "EN": "# Integration Tests\nLocated in a `tests/` folder at the project root.\n*   **Separate Crates**: Each file in `tests/*.rs` is compiled as a distinct crate that links to your library.\n*   **Black-box**: They can **only** call public API functions (`pub`). They cannot see private items.\n*   **Shared Code**: To share helpers between integration tests, create a `tests/common/mod.rs` module, not just `tests/common.rs` (to avoid it being treated as a test file itself).\n\n## Debugging Tools\n*   `dbg!(x)`: Macro that prints file/line and value to stderr. Returns the value (pass-through).\n*   `RUST_BACKTRACE=1`: Env var to print stack trace on panic.\n*   **Miri**: An interpreter for Rust's MIR (Mid-level IR). It can detect Undefined Behavior (UB), memory leaks, and alignment issues that standard tests might miss. Run via `cargo miri test`.",
+            "ES": "# Pruebas de Integración\nUbicadas en la carpeta `tests/`.\n*   **Crates Separados**: Cada archivo en `tests/*.rs` se compila como un crate distinto que se enlaza a tu librería.\n*   **Caja Negra**: Solo pueden llamar a la API pública (`pub`).\n*   **Código Compartido**: Para compartir helpers, crea `tests/common/mod.rs`.\n\n## Herramientas de Depuración\n*   `dbg!(x)`: Imprime archivo/línea y valor a stderr. Retorna el valor.\n*   `RUST_BACKTRACE=1`: Variable de entorno para ver stack trace.\n*   **Miri**: Intérprete para MIR. Detecta Comportamiento Indefinido (UB), fugas de memoria y problemas de alineación que tests normales no ven. Corre vía `cargo miri test`."
+          },
+          "codeSnippet": "// tests/integration_test.rs\n// use my_crate;\n\n#[test]\nfn test_public_api() {\n    // Only public functions available\n    // assert_eq!(my_crate::add(2, 2), 4);\n}\n\nfn main() {\n    let x = vec![1, 2, 3];\n    // dbg! prints to stderr but returns the value\n    let y = dbg!(x.len()) + 1; \n    println!(\"Y: {}\", y);\n}"
+        },
+        {
+          "id": "rf-6-lab",
+          "courseId": "rust-fundamentals",
+          "order": 3,
+          "type": "quiz",
+          "title": {
+            "EN": "Lab: QA Strategy",
+            "ES": "Lab: Estrategia QA"
+          },
+          "content": {
+            "EN": "Verify testing strategy.",
+            "ES": "Verifica estrategia de pruebas."
+          },
+          "quizData": [
+            {
+              "id": "q6-1",
+              "question": {
+                "EN": "Can integration tests access private functions?",
+                "ES": "¿Pueden los tests de integración acceder a funciones privadas?"
+              },
+              "options": {
+                "EN": [
+                  "Yes",
+                  "No"
+                ],
+                "ES": [
+                  "Sí",
+                  "No"
+                ]
+              },
+              "correctIndex": 1,
+              "explanation": {
+                "EN": "Integration tests compile as separate crates, treating your library as an external dependency (Black-box).",
+                "ES": "Los tests de integración compilan como crates separados, tratando tu librería como dependencia externa (Caja negra)."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rf-mod-7",
+      "title": {
+        "EN": "7. OOP & Generics",
+        "ES": "7. OOP y Genéricos"
+      },
+      "chapters": [
+        {
+          "id": "rf-7-1",
+          "courseId": "rust-fundamentals",
+          "order": 1,
+          "type": "concept",
+          "title": {
+            "EN": "Structs, Enums & Traits",
+            "ES": "Structs, Enums y Traits"
+          },
+          "content": {
+            "EN": "# OOP in Rust\nRust uses **Structs** for data and **Impl** blocks for methods.\nIt favors **Composition over Inheritance**. There is no class inheritance in Rust.\n\n## Traits (Encapsulation)\nTraits are like Interfaces. They define shared behavior.\n*   **Encapsulation**: You can use `pub` to control visibility.\n*   **Dynamic Dispatch**: Using `Box<dyn Trait>` allows polymorphism at runtime (vtable).",
+            "ES": "# OOP en Rust\nRust usa **Structs** para datos y bloques **Impl** para métodos.\nFavorece **Composición sobre Herencia**. No hay herencia de clases en Rust.\n\n## Traits (Encapsulamiento)\nLos Traits son como Interfaces. Definen comportamiento compartido.\n*   **Encapsulamiento**: Puedes usar `pub` para controlar visibilidad.\n*   **Despacho Dinámico**: Usar `Box<dyn Trait>` permite polimorfismo en runtime (vtable)."
+          },
+          "codeSnippet": "trait Draw {\n    fn draw(&self);\n}\n\nstruct Button { width: u32 }\nimpl Draw for Button {\n    fn draw(&self) { println!(\"Drawing button\"); }\n}"
+        },
+        {
+          "id": "rf-7-2",
+          "courseId": "rust-fundamentals",
+          "order": 2,
+          "type": "concept",
+          "title": {
+            "EN": "Generics & Static Dispatch",
+            "ES": "Genéricos y Despacho Estático"
+          },
+          "content": {
+            "EN": "# Generics\nSolve the problem of code duplication. Write code once, use for many types.\n\n## Static Dispatch (Monomorphization)\nWhen you use Generics (e.g., `fn foo<T: Trait>(item: T)`), Rust generates a unique version of the function for *each concrete type* used at compile time. This means generic code is **just as fast** as code written for specific types. There is no runtime overhead.",
+            "ES": "# Genéricos\nResuelven el problema de duplicación de código. Escribe una vez, usa para muchos tipos.\n\n## Despacho Estático (Monomorfización)\nCuando usas Genéricos (ej., `fn foo<T: Trait>(item: T)`), Rust genera una versión única de la función para *cada tipo concreto* usado al compilar. Esto significa que el código genérico es **igual de rápido** que el código específico. Sin sobrecarga en runtime."
+          },
+          "codeSnippet": "fn print<T: std::fmt::Display>(item: T) {\n    println!(\"{}\", item);\n}"
+        },
+        {
+          "id": "rf-7-lab",
+          "courseId": "rust-fundamentals",
+          "order": 3,
+          "type": "quiz",
+          "title": {
+            "EN": "Lab: OOP",
+            "ES": "Lab: OOP"
+          },
+          "content": {
+            "EN": "Test OOP patterns.",
+            "ES": "Prueba patrones OOP."
+          },
+          "quizData": [
+            {
+              "id": "q7-1",
+              "question": {
+                "EN": "Does Rust have class inheritance?",
+                "ES": "¿Rust tiene herencia de clases?"
+              },
+              "options": {
+                "EN": [
+                  "Yes",
+                  "No"
+                ],
+                "ES": [
+                  "Sí",
+                  "No"
+                ]
+              },
+              "correctIndex": 1,
+              "explanation": {
+                "EN": "Rust uses Traits for shared behavior, not inheritance.",
+                "ES": "Rust usa Traits para comportamiento compartido, no herencia."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rf-mod-8",
+      "title": {
+        "EN": "8. Functional Features",
+        "ES": "8. Características Funcionales"
+      },
+      "chapters": [
+        {
+          "id": "rf-8-1",
+          "courseId": "rust-fundamentals",
+          "order": 1,
+          "type": "concept",
+          "title": {
+            "EN": "Closures",
+            "ES": "Closures"
+          },
+          "content": {
+            "EN": "# Introduction to Closures\nAnonymous functions saved in variables. Syntax: `|param| body`.\nThey can capture their environment (variables from the scope they are defined in).\n\n## Capture Types\n1.  **Fn**: Borrows immutably.\n2.  **FnMut**: Borrows mutably.\n3.  **FnOnce**: Takes ownership (moves).",
+            "ES": "# Introducción a Closures\nFunciones anónimas guardadas en variables. Sintaxis: `|param| cuerpo`.\nPueden capturar su entorno (variables del ámbito donde se definen).\n\n## Tipos de Captura\n1.  **Fn**: Presta inmutablemente.\n2.  **FnMut**: Presta mutablemente.\n3.  **FnOnce**: Toma propiedad (mueve)."
+          },
+          "codeSnippet": "fn main() {\n    let x = 10;\n    let add_x = |y| y + x;\n    println!(\"{}\", add_x(5));\n}"
+        },
+        {
+          "id": "rf-8-2",
+          "courseId": "rust-fundamentals",
+          "order": 2,
+          "type": "concept",
+          "title": {
+            "EN": "Iterators",
+            "ES": "Iteradores"
+          },
+          "content": {
+            "EN": "# Iterators\nLazy sequences. \n*   **Consumers**: `sum`, `collect`, `find`. These drive the iterator.\n*   **Adapters**: `map`, `filter`, `zip`. These transform the iterator into a new one.\n\nRust iterators compile to highly optimized assembly, often faster than manual loops due to bounds check elision.",
+            "ES": "# Iteradores\nSecuencias perezosas.\n*   **Consumidores**: `sum`, `collect`, `find`. Estos conducen el iterador.\n*   **Adaptadores**: `map`, `filter`, `zip`. Transforman el iterador en uno nuevo.\n\nLos iteradores de Rust compilan a ensamblador altamente optimizado, a menudo más rápido que bucles manuales debido a la elisión de chequeos de límites."
+          },
+          "codeSnippet": "fn main() {\n    let v = vec![1, 2, 3];\n    let v2: Vec<_> = v.iter().map(|x| x + 1).collect();\n}"
+        },
+        {
+          "id": "rf-8-lab",
+          "courseId": "rust-fundamentals",
+          "order": 3,
+          "type": "quiz",
+          "title": {
+            "EN": "Lab: Functional",
+            "ES": "Lab: Funcional"
+          },
+          "content": {
+            "EN": "Check functional patterns.",
+            "ES": "Chequea patrones funcionales."
+          },
+          "quizData": [
+            {
+              "id": "q8-1",
+              "question": {
+                "EN": "Do iterators do work without a consumer?",
+                "ES": "¿Los iteradores hacen trabajo sin consumidor?"
+              },
+              "options": {
+                "EN": [
+                  "Yes",
+                  "No"
+                ],
+                "ES": [
+                  "Sí",
+                  "No"
+                ]
+              },
+              "correctIndex": 1,
+              "explanation": {
+                "EN": "Iterators are lazy.",
+                "ES": "Los iteradores son perezosos."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rf-mod-9",
+      "title": {
+        "EN": "9. Lifetimes",
+        "ES": "9. Lifetimes"
+      },
+      "chapters": [
+        {
+          "id": "rf-9-1",
+          "courseId": "rust-fundamentals",
+          "order": 1,
+          "type": "concept",
+          "title": {
+            "EN": "Lifetimes Basics",
+            "ES": "Básicos de Lifetimes"
+          },
+          "content": {
+            "EN": "# Lifetimes ('a)\nLifetimes ensure that references are valid as long as we use them. They prevent **Dangling References**.\n\nUsually, Rust infers lifetimes (Elision Rules). But when functions return references that depend on input references, we must annotate them explicitly to tell the compiler how the output lifetime relates to the inputs.",
+            "ES": "# Lifetimes ('a)\nLos lifetimes aseguran que las referencias sean válidas mientras las usemos. Previenen **Referencias Colgantes**.\n\nUsualmente, Rust infiere lifetimes (Reglas de Elisión). Pero cuando las funciones retornan referencias que dependen de referencias de entrada, debemos anotarlas explícitamente para decirle al compilador cómo se relaciona el lifetime de salida con las entradas."
+          },
+          "codeSnippet": "// x and y must live at least as long as 'a\n// return value lives as long as 'a\nfn longest<'a>(x: &'a str, y: &'a str) -> &'a str {\n    if x.len() > y.len() { x } else { y }\n}"
+        },
+        {
+          "id": "rf-9-lab",
+          "courseId": "rust-fundamentals",
+          "order": 2,
+          "type": "quiz",
+          "title": {
+            "EN": "Lab: Lifetimes",
+            "ES": "Lab: Lifetimes"
+          },
+          "content": {
+            "EN": "Verify lifetime knowledge.",
+            "ES": "Verifica conocimiento de lifetimes."
+          },
+          "quizData": [
+            {
+              "id": "q9-1",
+              "question": {
+                "EN": "What is the static lifetime?",
+                "ES": "¿Qué es el lifetime static?"
+              },
+              "options": {
+                "EN": [
+                  "Valid for a block",
+                  "Valid for entire program",
+                  "Valid for function"
+                ],
+                "ES": [
+                  "Válido por un bloque",
+                  "Válido por todo el programa",
+                  "Válido por la función"
+                ]
+              },
+              "correctIndex": 1,
+              "explanation": {
+                "EN": "`'static` lives for the entire duration of the program (e.g. string literals).",
+                "ES": "`'static` vive por la duración entera del programa (ej. literales de string)."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rf-mod-10",
+      "title": {
+        "EN": "10. Crates & Structure",
+        "ES": "10. Crates y Estructura"
+      },
+      "chapters": [
+        {
+          "id": "rf-10-1",
+          "courseId": "rust-fundamentals",
+          "order": 1,
+          "type": "concept",
+          "title": {
+            "EN": "Organization & Workspaces",
+            "ES": "Organización y Workspaces"
+          },
+          "content": {
+            "EN": "# Code Organization\n*   **Crates**: A compilation unit (binary or library).\n*   **Modules**: Organize code within a crate (`mod`).\n*   **Paths**: `use crate::module::Item`.\n\n## File Structure\n*   `src/main.rs`: Binary root.\n*   `src/lib.rs`: Library root.\n*   `src/my_mod.rs` OR `src/my_mod/mod.rs`.\n\n## Workspaces\nManage multiple crates in one repo sharing a `Cargo.lock`. Essential for \"Programming in the large\".",
+            "ES": "# Organización de Código\n*   **Crates**: Unidad de compilación (binario o librería).\n*   **Módulos**: Organizan código dentro de un crate (`mod`).\n*   **Rutas**: `use crate::modulo::Item`.\n\n## Estructura de Archivos\n*   `src/main.rs`: Raíz de binario.\n*   `src/lib.rs`: Raíz de librería.\n*   `src/mi_mod.rs` O `src/mi_mod/mod.rs`.\n\n## Workspaces\nGestionan múltiples crates en un repo compartiendo `Cargo.lock`. Esencial para \"Programación en grande\"."
+          },
+          "codeSnippet": "// Cargo.toml [workspace]\n// members = [\"lib_a\", \"bin_b\"]"
+        },
+        {
+          "id": "rf-10-lab",
+          "courseId": "rust-fundamentals",
+          "order": 2,
+          "type": "quiz",
+          "title": {
+            "EN": "Lab: Crates",
+            "ES": "Lab: Crates"
+          },
+          "content": {
+            "EN": "Test module system.",
+            "ES": "Prueba sistema de módulos."
+          },
+          "quizData": [
+            {
+              "id": "q10-1",
+              "question": {
+                "EN": "Is code private by default?",
+                "ES": "¿Es el código privado por defecto?"
+              },
+              "options": {
+                "EN": [
+                  "Yes",
+                  "No"
+                ],
+                "ES": [
+                  "Sí",
+                  "No"
+                ]
+              },
+              "correctIndex": 0,
+              "explanation": {
+                "EN": "You must use `pub` to make items accessible.",
+                "ES": "Debes usar `pub` para hacer los ítems accesibles."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rf-mod-11",
+      "title": {
+        "EN": "11. OS & Benchmarking",
+        "ES": "11. SO y Benchmarking"
+      },
+      "chapters": [
+        {
+          "id": "rf-11-1",
+          "courseId": "rust-fundamentals",
+          "order": 1,
+          "type": "concept",
+          "title": {
+            "EN": "OS Functions",
+            "ES": "Funciones del SO"
+          },
+          "content": {
+            "EN": "# OS Interaction\n*   **ENV Vars**: `std::env::var`.\n*   **File I/O**: `std::fs::File`. Reading/Writing.\n*   **Processes**: `std::process::Command`. Spawning child processes.\n*   **Cargo.toml additions**: Adding crates like `inotify` for file watching.",
+            "ES": "# Interacción con SO\n*   **Variables ENV**: `std::env::var`.\n*   **I/O de Archivos**: `std::fs::File`. Lectura/Escritura.\n*   **Procesos**: `std::process::Command`. Lanzar procesos hijos.\n*   **Adiciones Cargo.toml**: Añadir crates como `inotify` para vigilancia de archivos."
+          },
+          "codeSnippet": "use std::env;\nfn main() {\n    let path = env::var(\"PATH\").unwrap();\n    println!(\"System Path: {}\", path);\n}"
+        },
+        {
+          "id": "rf-11-2",
+          "courseId": "rust-fundamentals",
+          "order": 2,
+          "type": "concept",
+          "title": {
+            "EN": "Benchmarking",
+            "ES": "Benchmarking"
+          },
+          "content": {
+            "EN": "# Benchmarking\nMeasuring code performance.\n1.  **Simple**: `std::time::Instant`.\n2.  **Advanced**: `criterion` crate. Statistical analysis of performance.\n\n# Profiling\nTools like `perf`, `valgrind`, or `flamegraph` can be used with Rust binaries to find bottlenecks.",
+            "ES": "# Benchmarking\nMidiendo rendimiento de código.\n1.  **Simple**: `std::time::Instant`.\n2.  **Avanzado**: crate `criterion`. Análisis estadístico de rendimiento.\n\n# Profiling\nHerramientas como `perf`, `valgrind`, o `flamegraph` pueden usarse con binarios Rust para hallar cuellos de botella."
+          },
+          "codeSnippet": "use std::time::Instant;\nfn main() {\n    let start = Instant::now();\n    // Do work\n    let duration = start.elapsed();\n    println!(\"Time: {:?}\", duration);\n}"
+        },
+        {
+          "id": "rf-11-lab",
+          "courseId": "rust-fundamentals",
+          "order": 3,
+          "type": "quiz",
+          "title": {
+            "EN": "Lab: Systems",
+            "ES": "Lab: Sistemas"
+          },
+          "content": {
+            "EN": "Check OS knowledge.",
+            "ES": "Verifica conocimiento de SO."
+          },
+          "quizData": [
+            {
+              "id": "q11-1",
+              "question": {
+                "EN": "Can Rust spawn system processes?",
+                "ES": "¿Puede Rust lanzar procesos del sistema?"
+              },
+              "options": {
+                "EN": [
+                  "Yes",
+                  "No"
+                ],
+                "ES": [
+                  "Sí",
+                  "No"
+                ]
+              },
+              "correctIndex": 0,
+              "explanation": {
+                "EN": "Yes, using `std::process::Command`.",
+                "ES": "Sí, usando `std::process::Command`."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rf-mod-12",
+      "title": {
+        "EN": "12. Smart Pointers",
+        "ES": "12. Punteros Inteligentes"
+      },
+      "chapters": [
+        {
+          "id": "rf-12-1",
+          "courseId": "rust-fundamentals",
+          "order": 1,
+          "type": "concept",
+          "title": {
+            "EN": "Box & Rc",
+            "ES": "Box y Rc"
+          },
+          "content": {
+            "EN": "# Box<T>\nAllocates data on the Heap. Owns the data. Useful for recursive types (linked lists) where size must be known.\n\n# Rc<T>\nReference Counting. Allows **multiple owners** of the same data. Only for single-threaded use. Data is dropped when count reaches 0.",
+            "ES": "# Box<T>\nAsigna datos en el Heap. Posee el dato. Útil para tipos recursivos (listas enlazadas) donde el tamaño debe ser conocido.\n\n# Rc<T>\nConteo de Referencias. Permite **múltiples propietarios** del mismo dato. Solo para uso en un solo hilo. El dato se elimina cuando la cuenta llega a 0."
+          },
+          "codeSnippet": "use std::rc::Rc;\nfn main() {\n    let a = Rc::new(5);\n    let b = Rc::clone(&a);\n    println!(\"References: {}\", Rc::strong_count(&a));\n}"
+        },
+        {
+          "id": "rf-12-2",
+          "courseId": "rust-fundamentals",
+          "order": 2,
+          "type": "concept",
+          "title": {
+            "EN": "RefCell & Mutex",
+            "ES": "RefCell y Mutex"
+          },
+          "content": {
+            "EN": "# Interior Mutability\nAllows mutating data even when there are immutable references to it. Checked at runtime.\n\n*   **RefCell<T>**: Single thread. Panics at runtime if borrowing rules are violated.\n*   **Mutex<T>**: Thread safe. Locks data.\n*   **RwLock<T>**: Read/Write lock. Multiple readers or one writer.",
+            "ES": "# Mutabilidad Interior\nPermite mutar datos incluso cuando hay referencias inmutables a ellos. Chequeado en runtime.\n\n*   **RefCell<T>**: Un solo hilo. Entra en pánico en runtime si se violan reglas de préstamo.\n*   **Mutex<T>**: Seguro entre hilos. Bloquea datos.\n*   **RwLock<T>**: Bloqueo Lectura/Escritura. Múltiples lectores o un escritor."
+          },
+          "codeSnippet": "use std::cell::RefCell;\nfn main() {\n    let x = RefCell::new(5);\n    *x.borrow_mut() += 1;\n    println!(\"{:?}\", x);\n}"
+        },
+        {
+          "id": "rf-12-lab",
+          "courseId": "rust-fundamentals",
+          "order": 3,
+          "type": "quiz",
+          "title": {
+            "EN": "Lab: Pointers",
+            "ES": "Lab: Punteros"
+          },
+          "content": {
+            "EN": "Verify pointer types.",
+            "ES": "Verifica tipos de punteros."
+          },
+          "quizData": [
+            {
+              "id": "q12-1",
+              "question": {
+                "EN": "Which pointer is thread-safe?",
+                "ES": "¿Qué puntero es seguro entre hilos?"
+              },
+              "options": {
+                "EN": [
+                  "Rc",
+                  "Arc",
+                  "RefCell"
+                ],
+                "ES": [
+                  "Rc",
+                  "Arc",
+                  "RefCell"
+                ]
+              },
+              "correctIndex": 1,
+              "explanation": {
+                "EN": "Arc (Atomic Reference Count) is thread safe.",
+                "ES": "Arc (Atomic Reference Count) es seguro entre hilos."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rf-mod-13",
+      "title": {
+        "EN": "13. Concurrency",
+        "ES": "13. Concurrencia"
+      },
+      "chapters": [
+        {
+          "id": "rf-13-1",
+          "courseId": "rust-fundamentals",
+          "order": 1,
+          "type": "concept",
+          "title": {
+            "EN": "Threads & Channels",
+            "ES": "Hilos y Canales"
+          },
+          "content": {
+            "EN": "# Threads\nRust uses 1:1 OS threads. `thread::spawn`. Use `move` closures to transfer ownership to the thread.\n\n# Message Passing\n\"Do not communicate by sharing memory; share memory by communicating.\"\n**Channels** (`mpsc`): Multiple Producer, Single Consumer.\n*   `tx.send(val)`\n*   `rx.recv()`",
+            "ES": "# Hilos\nRust usa hilos del SO 1:1. `thread::spawn`. Usa closures `move` para transferir propiedad al hilo.\n\n# Paso de Mensajes\n\"No comuniques compartiendo memoria; comparte memoria comunicando.\"\n**Canales** (`mpsc`): Múltiples Productores, Un Consumidor.\n*   `tx.send(val)`\n*   `rx.recv()`"
+          },
+          "codeSnippet": "use std::thread;\nuse std::sync::mpsc;\n\nfn main() {\n    let (tx, rx) = mpsc::channel();\n    thread::spawn(move || {\n        tx.send(\"Hello form thread\").unwrap();\n    });\n    println!(\"{}\", rx.recv().unwrap());\n}"
+        },
+        {
+          "id": "rf-13-2",
+          "courseId": "rust-fundamentals",
+          "order": 2,
+          "type": "concept",
+          "title": {
+            "EN": "Shared State",
+            "ES": "Estado Compartido"
+          },
+          "content": {
+            "EN": "# Shared State\nTo share memory:\n*   **Mutex<T>**: Protects data.\n*   **Arc<T>**: Allows multiple threads to own the Mutex.\n\n# Atomics\n`std::sync::atomic`. Low level primitives like `AtomicUsize` for counters without Mutex overhead.\n\n# Async\nRust supports Asynchronous Programming (`async/await`) via external runtimes like **Tokio**. It uses a \"poll\" model.",
+            "ES": "# Estado Compartido\nPara compartir memoria:\n*   **Mutex<T>**: Protege datos.\n*   **Arc<T>**: Permite a múltiples hilos poseer el Mutex.\n\n# Atomics\n`std::sync::atomic`. Primitivas de bajo nivel como `AtomicUsize` para contadores sin la sobrecarga de Mutex.\n\n# Async\nRust soporta Programación Asíncrona (`async/await`) vía runtimes externos como **Tokio**. Usa un modelo \"poll\"."
+          },
+          "codeSnippet": "use std::sync::{Arc, Mutex};\nuse std::thread;\n\nfn main() {\n    let counter = Arc::new(Mutex::new(0));\n    let c = Arc::clone(&counter);\n    \n    thread::spawn(move || {\n        let mut num = c.lock().unwrap();\n        *num += 1;\n    }).join().unwrap();\n}"
+        },
+        {
+          "id": "rf-13-lab",
+          "courseId": "rust-fundamentals",
+          "order": 3,
+          "type": "quiz",
+          "title": {
+            "EN": "Lab: Concurrency",
+            "ES": "Lab: Concurrencia"
+          },
+          "content": {
+            "EN": "Test concurrency.",
+            "ES": "Prueba concurrencia."
+          },
+          "quizData": [
+            {
+              "id": "q13-1",
+              "question": {
+                "EN": "Does Rust Standard Library include an Async Runtime?",
+                "ES": "¿La librería estándar de Rust incluye un Runtime Async?"
+              },
+              "options": {
+                "EN": [
+                  "Yes",
+                  "No"
+                ],
+                "ES": [
+                  "Sí",
+                  "No"
+                ]
+              },
+              "correctIndex": 1,
+              "explanation": {
+                "EN": "No, you need crates like Tokio or async-std.",
+                "ES": "No, necesitas crates como Tokio o async-std."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rf-mod-14",
+      "title": {
+        "EN": "14. Deployment",
+        "ES": "14. Despliegue"
+      },
+      "chapters": [
+        {
+          "id": "rf-14-1",
+          "courseId": "rust-fundamentals",
+          "order": 1,
+          "type": "concept",
+          "title": {
+            "EN": "Containers & Cross-Compiling",
+            "ES": "Contenedores y Compilación Cruzada"
+          },
+          "content": {
+            "EN": "# Containers\nRust is ideal for containers (Docker/Podman).\n*   **Multi-stage builds**: Compile in a heavy image, copy binary to a tiny `scratch` or `alpine` image.\n*   Result: Extremely small images (< 20MB).\n\n# Cross-Compiling\nRust makes it easy to compile for other architectures.\n*   `rustup target add ...`\n*   Tools like **cross** simplify compiling for Linux from Mac/Windows using Docker.",
+            "ES": "# Contenedores\nRust es ideal para contenedores (Docker/Podman).\n*   **Builds multi-etapa**: Compila en una imagen pesada, copia el binario a una imagen diminuta `scratch` o `alpine`.\n*   Resultado: Imágenes extremadamente pequeñas (< 20MB).\n\n# Compilación Cruzada\nRust facilita compilar para otras arquitecturas.\n*   `rustup target add ...`\n*   Herramientas como **cross** simplifican compilar para Linux desde Mac/Windows usando Docker."
+          },
+          "codeSnippet": "# Dockerfile Example\nFROM rust:1.75 as builder\nWORKDIR /app\nCOPY . .\nRUN cargo build --release\n\nFROM debian:buster-slim\nCOPY --from=builder /app/target/release/app /usr/local/bin/app\nCMD [\"app\"]"
+        },
+        {
+          "id": "rf-14-lab",
+          "courseId": "rust-fundamentals",
+          "order": 2,
+          "type": "quiz",
+          "title": {
+            "EN": "Lab: Deploy",
+            "ES": "Lab: Despliegue"
+          },
+          "content": {
+            "EN": "Deployment quiz.",
+            "ES": "Quiz de despliegue."
+          },
+          "quizData": [
+            {
+              "id": "q14-1",
+              "question": {
+                "EN": "What is a multi-stage build used for?",
+                "ES": "¿Para qué se usa un build multi-etapa?"
+              },
+              "options": {
+                "EN": [
+                  "Faster compilation",
+                  "Smaller final image"
+                ],
+                "ES": [
+                  "Compilación más rápida",
+                  "Imagen final más pequeña"
+                ]
+              },
+              "correctIndex": 1,
+              "explanation": {
+                "EN": "It discards build tools to keep the runtime image small.",
+                "ES": "Descarta herramientas de construcción para mantener pequeña la imagen de runtime."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rf-mod-15",
+      "title": {
+        "EN": "15. Advanced & Closing",
+        "ES": "15. Avanzado y Cierre"
+      },
+      "chapters": [
+        {
+          "id": "rf-15-1",
+          "courseId": "rust-fundamentals",
+          "order": 1,
+          "type": "concept",
+          "title": {
+            "EN": "Unsafe Rust & FFI",
+            "ES": "Rust Unsafe y FFI"
+          },
+          "content": {
+            "EN": "# Unsafe Rust\nA hidden language inside Rust. Allows:\n1.  Dereference raw pointers.\n2.  Call unsafe functions (FFI).\n3.  Access mutable statics.\n4.  Implement unsafe traits.\n\nIt removes the safety net. You promise the compiler \"I know what I am doing\".\n\n# FFI (Foreign Function Interface)\nCalling C code from Rust or Rust from C.\n*   `extern \"C\"` blocks.\n*   `#[no_mangle]` to export Rust functions to C.",
+            "ES": "# Rust Unsafe\nUn lenguaje oculto dentro de Rust. Permite:\n1.  Desreferenciar punteros crudos.\n2.  Llamar funciones inseguras (FFI).\n3.  Acceder a estáticos mutables.\n4.  Implementar traits inseguros.\n\nQuita la red de seguridad. Le prometes al compilador \"Sé lo que estoy haciendo\".\n\n# FFI (Interfaz de Función Extranjera)\nLlamar código C desde Rust o Rust desde C.\n*   Bloques `extern \"C\"`.\n*   `#[no_mangle]` para exportar funciones Rust a C."
+          },
+          "codeSnippet": "fn main() {\n    let mut num = 5;\n    let r1 = &num as *const i32; // Raw pointer\n    \n    unsafe {\n        println!(\"r1 is: {}\", *r1); // Unsafe dereference\n    }\n}"
+        },
+        {
+          "id": "rf-15-lab",
+          "courseId": "rust-fundamentals",
+          "order": 2,
+          "type": "quiz",
+          "title": {
+            "EN": "Lab: Advanced",
+            "ES": "Lab: Avanzado"
+          },
+          "content": {
+            "EN": "Final technical check.",
+            "ES": "Chequeo técnico final."
+          },
+          "quizData": [
+            {
+              "id": "q15-1",
+              "question": {
+                "EN": "Can Unsafe Rust disable the Borrow Checker?",
+                "ES": "¿Puede Unsafe Rust deshabilitar el Borrow Checker?"
+              },
+              "options": {
+                "EN": [
+                  "Yes",
+                  "No"
+                ],
+                "ES": [
+                  "Sí",
+                  "No"
+                ]
+              },
+              "correctIndex": 1,
+              "explanation": {
+                "EN": "No, types are still checked. It mainly allows raw pointer access.",
+                "ES": "No, los tipos se siguen chequeando. Principalmente permite acceso a punteros crudos."
+              }
+            }
+          ]
+        },
+        {
+          "id": "rf-survey",
+          "courseId": "rust-fundamentals",
+          "order": 3,
+          "type": "concept",
+          "title": {
+            "EN": "Evaluation Survey",
+            "ES": "Encuesta de Evaluación"
+          },
+          "content": {
+            "EN": "Congratulations on finishing the course! You have covered the entire spectrum of Rust fundamentals. Please consider leaving feedback.",
+            "ES": "¡Felicidades por terminar el curso! Has cubierto el espectro entero de los fundamentos de Rust. Por favor considera dejar feedback."
+          }
+        }
+      ]
+    }
+  ],
+  "previewCode": "fn main() {\n    let s1 = String::from(\"hello\");\n    // Ownership rules in action\n    let s2 = s1; \n    \n    // println!(\"{}\", s1); // Error! Value moved\n    println!(\"New owner: {}\", s2);\n}"
+}

@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS courses (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    slug VARCHAR(255) UNIQUE NOT NULL,
     title VARCHAR(255) NOT NULL,
     description TEXT,
     level VARCHAR(50),

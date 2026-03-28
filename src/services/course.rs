@@ -43,6 +43,7 @@ impl CourseService {
 
         Ok(CourseDetails {
             id: course.id,
+            slug: course.slug,
             title: course.title,
             description: course.description,
             level: course.level,

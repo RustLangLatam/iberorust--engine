@@ -41,6 +41,7 @@ impl From<course::Model> for Course {
     fn from(model: course::Model) -> Self {
         Self {
             id: model.id,
+            slug: model.slug,
             title: serde_json::from_str(&model.title).unwrap_or_else(|_| serde_json::Value::String(model.title.clone())),
             description: model.description.map(|d| serde_json::from_str(&d).unwrap_or_else(|_| serde_json::Value::String(d))),
             level: model.level,
@@ -169,6 +170,7 @@ impl CourseRepository for CourseRepositoryImpl {
     async fn create_course(&self, req: CreateCourse) -> Result<Course, AppError> {
         let new_course = course::ActiveModel {
             id: Set(Uuid::new_v4()),
+            slug: Set(req.slug),
             title: Set(req.title.to_string()),
             description: Set(req.description.map(|d| d.to_string())),
             level: Set(req.level),
@@ -189,6 +191,9 @@ impl CourseRepository for CourseRepositoryImpl {
             .ok_or_else(|| AppError::NotFound("Course not found".to_string()))?
             .into();
 
+        if let Some(slug) = req.slug {
+            c.slug = Set(slug);
+        }
         if let Some(title) = req.title {
             c.title = Set(title.to_string());
         }

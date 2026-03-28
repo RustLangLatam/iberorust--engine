@@ -20,6 +20,7 @@ async fn test_get_course_structure_with_modules() {
         .returning(move |id| {
             Ok(Some(Course {
                 id,
+                slug: "rust-for-beginners".to_string(),
                 title: serde_json::Value::String("Rust for Beginners".to_string()),
                 description: Some(serde_json::Value::String("Learn Rust".to_string())),
                 level: Some("Beginner".to_string()),

@@ -7,6 +7,7 @@ use uuid::Uuid;
 pub struct Course {
     #[schema(value_type = String)]
     pub id: Uuid,
+    pub slug: String,
     #[schema(value_type = Object)]
     pub title: serde_json::Value,
     #[schema(value_type = Object)]
@@ -58,6 +59,7 @@ pub struct Chapter {
 pub struct CourseDetails {
     #[schema(value_type = String)]
     pub id: Uuid,
+    pub slug: String,
     #[schema(value_type = Object)]
     pub title: serde_json::Value,
     #[schema(value_type = Object)]
@@ -92,6 +94,7 @@ pub struct ChapterSummary {
 
 #[derive(Debug, Deserialize, ToSchema)]
 pub struct CreateCourse {
+    pub slug: String,
     #[schema(value_type = Object)]
     pub title: serde_json::Value,
     #[schema(value_type = Object)]
@@ -140,6 +143,7 @@ pub struct UpdateChapter {
 
 #[derive(Debug, Deserialize, ToSchema)]
 pub struct UpdateCourse {
+    pub slug: Option<String>,
     #[schema(value_type = Object)]
     pub title: Option<serde_json::Value>,
     #[schema(value_type = Object)]

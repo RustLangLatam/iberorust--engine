@@ -27,20 +27,26 @@ pub enum AppError {
 
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
-        let (status, error_message) = match self {
+        let (status, error_message) = match &self {
             AppError::DatabaseError(_) => (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "Database connection error".to_string(),
             ),
-            AppError::AuthError(msg) => (StatusCode::UNAUTHORIZED, msg),
-            AppError::ValidationError(msg) => (StatusCode::BAD_REQUEST, msg),
-            AppError::NotFound(msg) => (StatusCode::NOT_FOUND, msg),
+            AppError::AuthError(msg) => (StatusCode::UNAUTHORIZED, msg.clone()),
+            AppError::ValidationError(msg) => (StatusCode::BAD_REQUEST, msg.clone()),
+            AppError::NotFound(msg) => (StatusCode::NOT_FOUND, msg.clone()),
             AppError::InternalServerError(_) => {
                 (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error".to_string())
             }
-            AppError::Forbidden(msg) => (StatusCode::FORBIDDEN, msg),
-            AppError::BadRequest(msg) => (StatusCode::BAD_REQUEST, msg),
+            AppError::Forbidden(msg) => (StatusCode::FORBIDDEN, msg.clone()),
+            AppError::BadRequest(msg) => (StatusCode::BAD_REQUEST, msg.clone()),
         };
+
+        if status.is_server_error() {
+            tracing::error!("Server Error: {:?}", self);
+        } else if status.is_client_error() {
+            tracing::warn!("Client Error: {:?}", self);
+        }
 
         let body = Json(json!({
             "error": error_message,

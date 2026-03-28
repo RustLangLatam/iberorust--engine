@@ -9,7 +9,8 @@ pub struct Post {
     pub id: Uuid,
     #[schema(value_type = Object)]
     pub title: serde_json::Value,
-    pub content: String,
+    #[schema(value_type = Object)]
+    pub content: serde_json::Value,
     pub image_url: Option<String>,
     pub tags: Option<Vec<String>>,
     #[schema(value_type = String)]
@@ -28,6 +29,8 @@ pub struct PostSummary {
     pub id: Uuid,
     #[schema(value_type = Object)]
     pub title: serde_json::Value,
+    #[schema(value_type = Object)]
+    pub content: serde_json::Value,
     pub image_url: Option<String>,
     pub tags: Option<Vec<String>>,
     #[schema(value_type = String)]
@@ -40,7 +43,8 @@ pub struct PostSummary {
 pub struct CreatePost {
     #[schema(value_type = Object)]
     pub title: serde_json::Value,
-    pub content: String,
+    #[schema(value_type = Object)]
+    pub content: serde_json::Value,
     pub image_url: Option<String>,
     pub tags: Option<Vec<String>>,
     pub published_at: Option<DateTime<Utc>>,
@@ -50,7 +54,8 @@ pub struct CreatePost {
 pub struct UpdatePost {
     #[schema(value_type = Object)]
     pub title: Option<serde_json::Value>,
-    pub content: Option<String>,
+    #[schema(value_type = Object)]
+    pub content: Option<serde_json::Value>,
     pub image_url: Option<String>,
     pub tags: Option<Vec<String>>,
     pub published_at: Option<DateTime<Utc>>,

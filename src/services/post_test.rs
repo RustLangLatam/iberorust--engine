@@ -19,6 +19,7 @@ async fn test_list_posts_returns_summaries() {
             Ok(vec![PostSummary {
                 id: post_id,
                 title: serde_json::Value::String("First Post".to_string()),
+                content: serde_json::Value::String("First Content".to_string()),
                 image_url: None,
                 tags: None,
                 author_id: Some(author_id),

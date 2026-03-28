@@ -31,6 +31,8 @@ CREATE TABLE IF NOT EXISTS courses (
     description TEXT,
     level VARCHAR(50),
     image_url TEXT,
+    tags TEXT[],
+    prerequisites TEXT[],
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

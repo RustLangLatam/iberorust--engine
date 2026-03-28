@@ -1,0 +1,92 @@
+{
+  "id": "rust-ai",
+  "slug": "rust-ai",
+  "title": {
+    "EN": "AI & Machine Learning with Rust",
+    "ES": "IA y Machine Learning con Rust"
+  },
+  "description": {
+    "EN": "Harness the power of Rust for high-performance AI. Learn to use Candle and Burn frameworks, implement neural networks, and deploy models to WASM.",
+    "ES": "Aprovecha el poder de Rust para IA de alto rendimiento. Aprende a usar los frameworks Candle y Burn, implementa redes neuronales y despliega modelos en WASM."
+  },
+  "level": "Advanced",
+  "tags": [
+    "AI",
+    "ML",
+    "Tensors",
+    "Candle",
+    "GPU"
+  ],
+  "thumbnail": "https://placehold.co/800x500/083344/22D3EE/png?text=Rust+for+AI&font=roboto",
+  "modules": [
+    {
+      "id": "mod-ai-1",
+      "title": {
+        "EN": "1. AI Foundations & Tensors",
+        "ES": "1. Fundamentos de IA y Tensores"
+      },
+      "chapters": [
+        {
+          "id": "chap-ai-1-1",
+          "courseId": "rust-ai",
+          "order": 1,
+          "type": "concept",
+          "title": {
+            "EN": "Why Rust for AI?",
+            "ES": "¿Por qué Rust para IA?"
+          },
+          "hasVideo": true,
+          "content": {
+            "EN": "# AI in the Rust Era\n\nTraditionally, Python has dominated AI due to its ease of use. However, as models scale, two problems emerge: **Memory Safety** and **Execution Overhead**.\n\n## The Performance Bottleneck\nPython relies on C++ bindings (PyTorch/TensorFlow). While the core kernels are fast, the \"glue code\" introduces latency. Rust allows for:\n1. **Zero-cost FFI**: Seamless interaction with CUDA and Metal.\n2. **In-place Mutations**: Optimized tensor operations without unnecessary allocations.\n3. **Safe Concurrency**: Distributing model weights across CPU cores without data races.\n\n## Candle Framework\nDeveloped by Hugging Face, **Candle** is a minimalist ML framework for Rust. It prioritizes small binary sizes and running models in the browser (WASM) or at the edge.",
+            "ES": "# La IA en la Era de Rust\n\nTradicionalmente, Python ha dominado la IA. Sin embargo, al escalar modelos, surgen dos problemas: **Seguridad de Memoria** y **Sobrecarga de Ejecución**.\n\n## El Cuello de Botella de Rendimiento\nPython depende de bindings de C++. Rust permite:\n1. **FFI de Costo Cero**: Interacción fluida con CUDA y Metal.\n2. **Mutaciones In-place**: Operaciones de tensores optimizadas sin asignaciones innecesarias.\n3. **Concurrencia Segura**: Distribuir pesos del modelo entre núcleos sin carreras de datos.\n\n## Framework Candle\nDesarrollado por Hugging Face, **Candle** es un framework ML minimalista para Rust. Prioriza tamaños de binario pequeños y ejecución en el navegador (WASM)."
+          },
+          "codeSnippet": "// Using Candle for Tensor Math\n// use candle_core::{Device, Tensor};\n\nfn main() {\n    println!(\"Initializing AI Environment...\");\n    // let a = Tensor::new(&[1f32, 2., 3., 4.], &Device::Cpu).unwrap();\n    // let b = a.matmul(&a).unwrap();\n    \n    println!(\"Tensor computation localized in Rust memory.\");\n}"
+        },
+        {
+          "id": "chap-ai-1-quiz",
+          "courseId": "rust-ai",
+          "order": 2,
+          "type": "quiz",
+          "title": {
+            "EN": "Quiz: AI Fundamentals",
+            "ES": "Quiz: Fundamentos de IA"
+          },
+          "content": {
+            "EN": "Verify AI patterns in Rust.",
+            "ES": "Verifica patrones de IA en Rust."
+          },
+          "quizData": [
+            {
+              "id": "q-ai-1",
+              "question": {
+                "EN": "What is a primary benefit of using Rust for AI inference?",
+                "ES": "¿Cuál es un beneficio principal de usar Rust para inferencia de IA?"
+              },
+              "options": {
+                "EN": [
+                  "More libraries than Python",
+                  "Lower memory footprint and higher execution speed",
+                  "It is easier to write than Python"
+                ],
+                "ES": [
+                  "Más librerías que Python",
+                  "Menor huella de memoria y mayor velocidad de ejecución",
+                  "Es más fácil de escribir que Python"
+                ]
+              },
+              "correctIndex": 1,
+              "explanation": {
+                "EN": "Rust eliminates the overhead of the Python interpreter and provides safe, high-performance memory management.",
+                "ES": "Rust elimina la sobrecarga del intérprete de Python y provee una gestión de memoria segura y de alto rendimiento."
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "previewCode": "use candle_core::{Device, Tensor};\n\nfn main() -> Result<(), Box<dyn std::error::Error>> {\n    let device = Device::Cpu;\n    let data = Tensor::randn(0f32, 1.0, (2, 2), &device)?;\n    \n    println!(\"Random Neural Weights:\\n{}\", data);\n    Ok(())\n}",
+  "prerequisites": [
+    "rust-concurrency"
+  ]
+}

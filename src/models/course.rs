@@ -14,6 +14,8 @@ pub struct Course {
     pub description: Option<serde_json::Value>,
     pub level: Option<String>,
     pub image_url: Option<String>,
+    pub tags: Option<Vec<String>>,
+    pub prerequisites: Option<Vec<String>>,
     #[schema(value_type = String)]
     pub created_at: DateTime<Utc>,
     #[schema(value_type = String)]
@@ -66,6 +68,8 @@ pub struct CourseDetails {
     pub description: Option<serde_json::Value>,
     pub level: Option<String>,
     pub image_url: Option<String>,
+    pub tags: Option<Vec<String>>,
+    pub prerequisites: Option<Vec<String>>,
     pub modules: Vec<ModuleDetails>,
 }
 
@@ -101,6 +105,8 @@ pub struct CreateCourse {
     pub description: Option<serde_json::Value>,
     pub level: Option<String>,
     pub image_url: Option<String>,
+    pub tags: Option<Vec<String>>,
+    pub prerequisites: Option<Vec<String>>,
 }
 
 #[derive(Debug, Deserialize, ToSchema)]
@@ -150,4 +156,6 @@ pub struct UpdateCourse {
     pub description: Option<serde_json::Value>,
     pub level: Option<String>,
     pub image_url: Option<String>,
+    pub tags: Option<Vec<String>>,
+    pub prerequisites: Option<Vec<String>>,
 }

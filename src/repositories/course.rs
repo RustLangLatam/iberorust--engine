@@ -46,6 +46,8 @@ impl From<course::Model> for Course {
             description: model.description.map(|d| serde_json::from_str(&d).unwrap_or_else(|_| serde_json::Value::String(d))),
             level: model.level,
             image_url: model.image_url,
+            tags: model.tags,
+            prerequisites: model.prerequisites,
             created_at: model.created_at,
             updated_at: model.updated_at,
         }
@@ -175,6 +177,8 @@ impl CourseRepository for CourseRepositoryImpl {
             description: Set(req.description.map(|d| d.to_string())),
             level: Set(req.level),
             image_url: Set(req.image_url),
+            tags: Set(req.tags),
+            prerequisites: Set(req.prerequisites),
             created_at: Set(Utc::now()),
             updated_at: Set(Utc::now()),
             ..Default::default()
@@ -205,6 +209,12 @@ impl CourseRepository for CourseRepositoryImpl {
         }
         if let Some(image_url) = req.image_url {
             c.image_url = Set(Some(image_url));
+        }
+        if let Some(tags) = req.tags {
+            c.tags = Set(Some(tags));
+        }
+        if let Some(prerequisites) = req.prerequisites {
+            c.prerequisites = Set(Some(prerequisites));
         }
         c.updated_at = Set(Utc::now());
 

@@ -1,0 +1,49 @@
+{
+  "id": "rust-301",
+  "slug": "rust-advanced",
+  "title": {
+    "EN": "Advanced Rust: Deep Dive",
+    "ES": "Rust Avanzado: Profundización"
+  },
+  "description": {
+    "EN": "Deep ownership, HRTB lifetimes, interior mutability, macros, and unsafe invariants.",
+    "ES": "Ownership profundo, lifetimes HRTB, mutabilidad interior, macros e invariantes unsafe."
+  },
+  "level": "Advanced",
+  "tags": [
+    "Unsafe",
+    "Lifetimes",
+    "FFI"
+  ],
+  "thumbnail": "https://placehold.co/800x500/8D2D1D/FFFFFF/png?text=Advanced+Rust&font=roboto",
+  "modules": [
+    {
+      "id": "mod-adv-1",
+      "title": {
+        "EN": "1. Unsafe Rust",
+        "ES": "1. Rust Unsafe"
+      },
+      "chapters": [
+        {
+          "id": "chap-adv-1",
+          "courseId": "rust-301",
+          "order": 1,
+          "type": "concept",
+          "title": {
+            "EN": "Raw Pointers",
+            "ES": "Punteros Crudos"
+          },
+          "hasVideo": true,
+          "content": {
+            "EN": "# Unsafe Rust\n\nRust has a second language hidden inside it. Unsafe Rust gives you superpowers, but removes the safety net. It is used when you need to interface with the OS or hardware directly, or when you need to build abstractions that the compiler's borrow checker cannot verify but you know are correct.\n\n## Superpowers\n1. Dereference raw pointers.\n2. Call unsafe functions (FFI).\n3. Access or modify mutable static variables.\n4. Implement unsafe traits.",
+            "ES": "# Rust Unsafe (Inseguro)\n\nRust tiene un segundo lenguaje oculto en su interior. Unsafe Rust te da superpoderes, pero quita la red de seguridad. Se usa para interactuar con el SO o hardware directamente, o cuando necesitas construir abstracciones que el borrow checker no puede verificar pero tú sabes que son correctas.\n\n## Superpoderes\n1. Desreferenciar punteros crudos.\n2. Llamar funciones inseguras (FFI).\n3. Acceder o modificar variables estáticas mutables.\n4. Implementar traits inseguros."
+          },
+          "codeSnippet": "fn main() {\n    let mut num = 5;\n    \n    // Creating raw pointers is SAFE\n    let r1 = &num as *const i32;\n    let r2 = &mut num as *mut i32;\n    \n    // Dereferencing them is UNSAFE\n    unsafe {\n        println!(\"r1 is: {}\", *r1);\n        println!(\"r2 is: {}\", *r2);\n        \n        *r2 = 10;\n        println!(\"r2 is now: {}\", *r2);\n    }\n}"
+        }
+      ]
+    }
+  ],
+  "prerequisites": [
+    "rust-macros"
+  ]
+}

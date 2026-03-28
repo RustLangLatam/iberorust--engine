@@ -13,6 +13,8 @@ pub struct Model {
     pub level: Option<String>,
     #[sea_orm(column_type = "Text")]
     pub image_url: Option<String>,
+    pub tags: Option<Vec<String>>,
+    pub prerequisites: Option<Vec<String>>,
     pub created_at: DateTimeUtc,
     pub updated_at: DateTimeUtc,
 }

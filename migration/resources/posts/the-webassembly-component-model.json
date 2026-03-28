@@ -1,0 +1,12 @@
+{
+  "title": {
+    "EN": "The WebAssembly Component Model",
+    "ES": "El Modelo de Componentes de WebAssembly"
+  },
+  "content": "{\"EN\":\"Moving beyond monolithic WASM modules to composable, language-agnostic components.\",\"ES\":\"Más allá de módulos WASM monolíticos hacia componentes componibles y agnósticos del lenguaje.\"}",
+  "image_url": "https://placehold.co/600x400/654FF0/FFFFFF/png?text=WASM+Components",
+  "published_at": "2024-04-20T00:00:00.000Z",
+  "tags": [
+    "WASM"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "title": {
+    "EN": "Rust Atomics and Locks",
+    "ES": "Rust Atomics and Locks"
+  },
+  "description": {
+    "EN": "Deep dive into low-level concurrency.",
+    "ES": "Profundización en concurrencia de bajo nivel."
+  },
+  "url": "https://marabos.nl/atomics/",
+  "type": "Advanced"
+}

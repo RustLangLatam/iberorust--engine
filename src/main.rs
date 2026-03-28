@@ -253,7 +253,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let auth_service = Arc::new(services::auth::AuthService::new(user_repo.clone(), app_config.auth.jwt_secret.clone()));
     let user_service = Arc::new(services::user::UserService::new(user_repo.clone()));
-    let course_service = Arc::new(services::course::CourseService::new(course_repo.clone()));
+    let course_service = Arc::new(services::course::CourseService::new(course_repo.clone(), progress_repo.clone()));
     let progress_service = Arc::new(services::progress::ProgressService::new(
         progress_repo.clone(),
         course_repo.clone(),

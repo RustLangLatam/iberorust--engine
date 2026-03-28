@@ -1,0 +1,12 @@
+{
+  "title": {
+    "EN": "Command Line Apps in Rust",
+    "ES": "Command Line Apps in Rust"
+  },
+  "description": {
+    "EN": "How to build effective CLI tools in Rust.",
+    "ES": "Cómo construir herramientas CLI efectivas en Rust."
+  },
+  "url": "https://rust-cli.github.io/book/",
+  "type": "Domain"
+}

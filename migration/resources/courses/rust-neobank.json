@@ -1,0 +1,34 @@
+{
+  "id": "rust-neobank",
+  "slug": "rust-neobank",
+  "title": {
+    "EN": "Building a Neobank Core",
+    "ES": "Construyendo un Core Bancario"
+  },
+  "description": {
+    "EN": "🚧 COMING SOON. Event Sourcing, CQRS, double-entry ledgers, and ISO 8583 implementation.",
+    "ES": "🚧 PRÓXIMAMENTE. Event Sourcing, CQRS, contabilidad de doble entrada e implementación ISO 8583."
+  },
+  "level": "Architecture",
+  "tags": [
+    "FinTech",
+    "CQRS",
+    "Event Sourcing",
+    "Finance"
+  ],
+  "thumbnail": "https://placehold.co/800x500/1F1F1F/4ADE80/png?text=Neobank+Core&font=roboto",
+  "modules": [
+    {
+      "id": "cs-mod",
+      "title": {
+        "EN": "Coming Soon",
+        "ES": "Próximamente"
+      },
+      "chapters": []
+    }
+  ],
+  "prerequisites": [
+    "rust-arch"
+  ],
+  "previewCode": "struct Ledger {\n    accounts: HashMap<AccountId, Balance>,\n}\n\nimpl Ledger {\n    // Atomic Transaction\n    fn transfer(&mut self, tx: Transaction) -> Result<()> {\n        self.debit(tx.from, tx.amount)?;\n        self.credit(tx.to, tx.amount)?;\n        Ok(())\n    }\n}"
+}

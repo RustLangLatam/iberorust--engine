@@ -1,0 +1,12 @@
+{
+  "title": {
+    "EN": "The Rustdoc Book",
+    "ES": "The Rustdoc Book"
+  },
+  "description": {
+    "EN": "Learn how to write documentation and run doc-tests.",
+    "ES": "Aprende cómo escribir documentación y ejecutar doc-tests."
+  },
+  "url": "https://doc.rust-lang.org/rustdoc/",
+  "type": "Tools"
+}

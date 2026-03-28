@@ -1,0 +1,12 @@
+{
+  "title": {
+    "EN": "Case Study: Rewriting a C++ Engine",
+    "ES": "Caso de Estudio: Reescribiendo un Motor C++"
+  },
+  "content": "{\"EN\":\"How we migrated a high-performance physics engine to Rust and gained memory safety without losing speed.\",\"ES\":\"Cómo migramos un motor de física de alto rendimiento a Rust y ganamos seguridad de memoria sin perder velocidad.\"}",
+  "image_url": "https://placehold.co/600x400/0F766E/FFFFFF/png?text=Rewrite+in+Rust",
+  "published_at": "2024-05-10T00:00:00.000Z",
+  "tags": [
+    "Case Study"
+  ]
+}

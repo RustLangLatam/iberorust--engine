@@ -68,3 +68,16 @@ impl FromRequestParts<SharedState> for ModeratorUser
         Ok(ModeratorUser(user))
     }
 }
+
+pub struct OptionalAuthUser(pub Option<AuthUser>);
+
+impl FromRequestParts<SharedState> for OptionalAuthUser {
+    type Rejection = std::convert::Infallible;
+
+    async fn from_request_parts(parts: &mut Parts, state: &SharedState) -> Result<Self, Self::Rejection> {
+        match AuthUser::from_request_parts(parts, state).await {
+            Ok(user) => Ok(OptionalAuthUser(Some(user))),
+            Err(_) => Ok(OptionalAuthUser(None)),
+        }
+    }
+}

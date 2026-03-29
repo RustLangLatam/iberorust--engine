@@ -1,0 +1,12 @@
+{
+  "title": {
+    "EN": "Rust in the Linux Kernel",
+    "ES": "Rust en el Kernel de Linux"
+  },
+  "content": "{\"EN\":\"How Rust is being adopted for driver development in Linux 6.1+ and what it means for system stability.\",\"ES\":\"Cómo Rust está siendo adoptado para el desarrollo de drivers en Linux 6.1+ y qué significa para la estabilidad del sistema.\"}",
+  "image_url": "https://placehold.co/600x400/2C3E50/FFFFFF/png?text=Linux+Kernel",
+  "published_at": "2024-04-28T00:00:00.000Z",
+  "tags": [
+    "Kernel"
+  ]
+}

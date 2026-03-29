@@ -13,8 +13,8 @@ impl ReferenceService {
         Self { reference_repo }
     }
 
-    pub async fn list_references(&self) -> Result<Vec<Reference>, AppError> {
-        self.reference_repo.list_references().await
+    pub async fn list_references(&self, filters: crate::models::common::PaginationAndFilters) -> Result<Vec<Reference>, AppError> {
+        self.reference_repo.list_references(filters).await
     }
 
     pub async fn create_reference(&self, req: CreateReference) -> Result<Reference, AppError> {

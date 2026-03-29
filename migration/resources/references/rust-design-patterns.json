@@ -1,0 +1,12 @@
+{
+  "title": {
+    "EN": "Rust Design Patterns",
+    "ES": "Rust Design Patterns"
+  },
+  "description": {
+    "EN": "Common design patterns and idioms in Rust.",
+    "ES": "Patrones de diseño comunes y modismos en Rust."
+  },
+  "url": "https://rust-unofficial.github.io/patterns/",
+  "type": "Best Practices"
+}

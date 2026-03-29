@@ -1,0 +1,12 @@
+{
+  "title": {
+    "EN": "Rust Compiler Dev Guide",
+    "ES": "Rust Compiler Dev Guide"
+  },
+  "description": {
+    "EN": "Guide for contributing to the rustc compiler.",
+    "ES": "Guía para contribuir al compilador rustc."
+  },
+  "url": "https://rustc-dev-guide.rust-lang.org/",
+  "type": "Advanced"
+}

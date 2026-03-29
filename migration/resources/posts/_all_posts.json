@@ -1,0 +1,110 @@
+[
+  {
+    "title": {
+      "EN": "Rust 1.79: What's New?",
+      "ES": "Rust 1.79: ¿Qué hay de nuevo?"
+    },
+    "content": "{\"EN\":\"Inline const expressions, temporary lifetime extension in matches, and stabilization of lazy_cell.\",\"ES\":\"Expresiones const en línea, extensión temporal de lifetime en matches y estabilización de lazy_cell.\"}",
+    "image_url": "https://placehold.co/600x400/CE412B/FFFFFF/png?text=Rust+1.79",
+    "published_at": "2024-05-20T00:00:00.000Z",
+    "tags": [
+      "Release"
+    ]
+  },
+  {
+    "title": {
+      "EN": "Async Traits: The Hard Parts",
+      "ES": "Async Traits: Las Partes Difíciles"
+    },
+    "content": "{\"EN\":\"Understanding why async traits were hard to implement and how the new return position impl Trait solves it.\",\"ES\":\"Entendiendo por qué los traits asíncronos fueron difíciles de implementar y cómo la nueva posición de retorno impl Trait lo resuelve.\"}",
+    "image_url": "https://placehold.co/600x400/1F1F1F/CE412B/png?text=Async+Traits",
+    "published_at": "2024-05-15T00:00:00.000Z",
+    "tags": [
+      "Deep Dive"
+    ]
+  },
+  {
+    "title": {
+      "EN": "Case Study: Rewriting a C++ Engine",
+      "ES": "Caso de Estudio: Reescribiendo un Motor C++"
+    },
+    "content": "{\"EN\":\"How we migrated a high-performance physics engine to Rust and gained memory safety without losing speed.\",\"ES\":\"Cómo migramos un motor de física de alto rendimiento a Rust y ganamos seguridad de memoria sin perder velocidad.\"}",
+    "image_url": "https://placehold.co/600x400/0F766E/FFFFFF/png?text=Rewrite+in+Rust",
+    "published_at": "2024-05-10T00:00:00.000Z",
+    "tags": [
+      "Case Study"
+    ]
+  },
+  {
+    "title": {
+      "EN": "Zero-Copy Deserialization with rkyv",
+      "ES": "Deserialización Zero-Copy con rkyv"
+    },
+    "content": "{\"EN\":\"Achieving instant load times for game assets using zero-copy serialization techniques.\",\"ES\":\"Logrando tiempos de carga instantáneos para assets de juego usando técnicas de serialización zero-copy.\"}",
+    "image_url": "https://placehold.co/600x400/A020F0/FFFFFF/png?text=Zero+Copy",
+    "published_at": "2024-05-01T00:00:00.000Z",
+    "tags": [
+      "Performance"
+    ]
+  },
+  {
+    "title": {
+      "EN": "Rust in the Linux Kernel",
+      "ES": "Rust en el Kernel de Linux"
+    },
+    "content": "{\"EN\":\"How Rust is being adopted for driver development in Linux 6.1+ and what it means for system stability.\",\"ES\":\"Cómo Rust está siendo adoptado para el desarrollo de drivers en Linux 6.1+ y qué significa para la estabilidad del sistema.\"}",
+    "image_url": "https://placehold.co/600x400/2C3E50/FFFFFF/png?text=Linux+Kernel",
+    "published_at": "2024-04-28T00:00:00.000Z",
+    "tags": [
+      "Kernel"
+    ]
+  },
+  {
+    "title": {
+      "EN": "The WebAssembly Component Model",
+      "ES": "El Modelo de Componentes de WebAssembly"
+    },
+    "content": "{\"EN\":\"Moving beyond monolithic WASM modules to composable, language-agnostic components.\",\"ES\":\"Más allá de módulos WASM monolíticos hacia componentes componibles y agnósticos del lenguaje.\"}",
+    "image_url": "https://placehold.co/600x400/654FF0/FFFFFF/png?text=WASM+Components",
+    "published_at": "2024-04-20T00:00:00.000Z",
+    "tags": [
+      "WASM"
+    ]
+  },
+  {
+    "title": {
+      "EN": "Idiomatic Error Handling",
+      "ES": "Manejo de Errores Idiomático"
+    },
+    "content": "{\"EN\":\"Stop unwrapping. Learn how to use anyhow and thiserror to build robust applications.\",\"ES\":\"Deja de hacer unwrap. Aprende a usar anyhow y thiserror para construir aplicaciones robustas.\"}",
+    "image_url": "https://placehold.co/600x400/D35400/FFFFFF/png?text=Error+Handling",
+    "published_at": "2024-04-15T00:00:00.000Z",
+    "tags": [
+      "Best Practices"
+    ]
+  },
+  {
+    "title": {
+      "EN": "Macros 101: Don't Repeat Yourself",
+      "ES": "Macros 101: No Te Repitas"
+    },
+    "content": "{\"EN\":\"A gentle introduction to writing your first declarative macro with macro_rules!.\",\"ES\":\"Una introducción amable para escribir tu primera macro declarativa con macro_rules!.\"}",
+    "image_url": "https://placehold.co/600x400/8E44AD/FFFFFF/png?text=Macros+101",
+    "published_at": "2024-04-10T00:00:00.000Z",
+    "tags": [
+      "Metaprogramming"
+    ]
+  },
+  {
+    "title": {
+      "EN": "Tokio vs Async-std",
+      "ES": "Tokio vs Async-std"
+    },
+    "content": "{\"EN\":\"Comparing the two major async runtimes. Which one should you choose for your next project?\",\"ES\":\"Comparando los dos runtimes asíncronos principales. ¿Cuál deberías elegir para tu próximo proyecto?\"}",
+    "image_url": "https://placehold.co/600x400/27AE60/FFFFFF/png?text=Async+Runtimes",
+    "published_at": "2024-04-05T00:00:00.000Z",
+    "tags": [
+      "Ecosystem"
+    ]
+  }
+]

@@ -1,0 +1,46 @@
+{
+  "id": "rust-arch",
+  "slug": "system-architecture",
+  "title": {
+    "EN": "System Architecture (DDD/CQRS)",
+    "ES": "Arquitectura de Sistemas (DDD/CQRS)"
+  },
+  "description": {
+    "EN": "Domain Driven Design, Hexagonal Architecture, and CQRS in Rust. Structuring complex applications.",
+    "ES": "Diseño Guiado por el Dominio, Arquitectura Hexagonal y CQRS en Rust. Estructurando aplicaciones complejas."
+  },
+  "level": "Architecture",
+  "tags": [
+    "DDD",
+    "Clean Arch",
+    "CQRS"
+  ],
+  "thumbnail": "https://placehold.co/800x500/3D3D3D/FFFFFF/png?text=Systems+Architecture&font=roboto",
+  "modules": [
+    {
+      "id": "mod-arch-1",
+      "title": {
+        "EN": "1. Hexagonal Architecture",
+        "ES": "1. Arquitectura Hexagonal"
+      },
+      "chapters": [
+        {
+          "id": "chap-arch-1",
+          "courseId": "rust-arch",
+          "order": 1,
+          "type": "concept",
+          "title": {
+            "EN": "Ports & Adapters",
+            "ES": "Puertos y Adaptadores"
+          },
+          "hasVideo": true,
+          "content": {
+            "EN": "# Hexagonal Architecture\n\nAlso known as Ports and Adapters. The goal is to isolate your core business logic (Domain) from the outside world (DB, HTTP, UI).\n\n## The Pattern in Rust\n1. **Domain**: Pure Rust structs. No dependencies on SQLx or Axum.\n2. **Ports**: Traits defined in the domain layer that define *how* the domain interacts with the world (e.g., `UserRepository`).\n3. **Adapters**: Implementations of those traits (e.g., `PostgresUserRepository`) or things that drive the domain (e.g., HTTP Handlers).",
+            "ES": "# Arquitectura Hexagonal\n\nTambién conocida como Puertos y Adaptadores. El objetivo es aislar tu lógica de negocio central (Dominio) del mundo exterior (BD, HTTP, UI).\n\n## El Patrón en Rust\n1. **Dominio**: Structs de Rust puros. Sin dependencias de SQLx o Axum.\n2. **Puertos**: Traits definidos en la capa de dominio que definen *cómo* el dominio interactúa con el mundo (ej. `UserRepository`).\n3. **Adaptadores**: Implementaciones de esos traits (ej. `PostgresUserRepository`) o cosas que manejan el dominio (ej. Handlers HTTP)."
+          },
+          "codeSnippet": "trait Repository {\n    fn save(&self, data: String);\n}\n\nstruct PostgresRepo;\nimpl Repository for PostgresRepo {\n    fn save(&self, data: String) {\n        println!(\"Saving '{}' to Postgres...\", data);\n    }\n}\n\n// Service depends on Trait, not implementation\nfn create_user(repo: &impl Repository, name: String) {\n    repo.save(name);\n}\n\nfn main() {\n    let repo = PostgresRepo;\n    create_user(&repo, String::from(\"Alice\"));\n}"
+        }
+      ]
+    }
+  ]
+}

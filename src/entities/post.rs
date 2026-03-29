@@ -10,6 +10,9 @@ pub struct Model {
     pub content: String,
     pub author_id: Option<Uuid>,
     pub published_at: Option<DateTimeUtc>,
+    #[sea_orm(column_type = "Text")]
+    pub image_url: Option<String>,
+    pub tags: Option<Vec<String>>,
     pub created_at: DateTimeUtc,
     pub updated_at: DateTimeUtc,
 }

@@ -24,8 +24,8 @@ impl CommunityService {
         }
     }
 
-    pub async fn list_threads(&self) -> Result<Vec<Thread>, AppError> {
-        self.community_repo.list_threads().await
+    pub async fn list_threads(&self, filters: crate::models::common::PaginationAndFilters) -> Result<Vec<Thread>, AppError> {
+        self.community_repo.list_threads(filters).await
     }
 
     pub async fn get_thread_with_comments(

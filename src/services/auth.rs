@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};
 use uuid::Uuid;
+use argon2::{Argon2, PasswordHash, PasswordVerifier};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
@@ -78,6 +79,7 @@ impl AuthService {
             name: token_info.name,
             google_id: Some(token_info.sub),
             avatar_url: token_info.picture,
+            password_hash: None,
         })
     }
 
@@ -101,10 +103,33 @@ impl AuthService {
             name: "Guest User".to_string(),
             google_id: None,
             avatar_url: None,
+            password_hash: None,
         };
 
         let user = self.user_repo.create_user(create_req, true).await?;
 
         self.generate_jwt(user.id, &user.email, user.is_guest, &user.role)
+    }
+
+    pub async fn login_standard(&self, email: &str, password: &str) -> Result<String, AppError> {
+        let user = self
+            .user_repo
+            .find_by_email(email)
+            .await?
+            .ok_or_else(|| AppError::AuthError("Invalid email or password".to_string()))?;
+
+        if let Some(hash) = &user.password_hash {
+            let parsed_hash = PasswordHash::new(hash)
+                .map_err(|_| AppError::InternalServerError(anyhow::anyhow!("Invalid password hash format")))?;
+
+            let argon2 = Argon2::default();
+            if argon2.verify_password(password.as_bytes(), &parsed_hash).is_err() {
+                return Err(AppError::AuthError("Invalid email or password".to_string()));
+            }
+
+            self.generate_jwt(user.id, &user.email, user.is_guest, &user.role)
+        } else {
+            Err(AppError::AuthError("Account requires external login (e.g. Google)".to_string()))
+        }
     }
 }

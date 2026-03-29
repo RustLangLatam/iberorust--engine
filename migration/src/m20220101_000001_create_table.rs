@@ -18,15 +18,21 @@ CREATE TABLE IF NOT EXISTS users (
     avatar_url TEXT,
     preferred_language VARCHAR(10) DEFAULT 'EN',
     theme VARCHAR(20) DEFAULT 'system',
+    role VARCHAR(50) DEFAULT 'USER' NOT NULL,
+    password_hash VARCHAR(255),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS courses (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    slug VARCHAR(255) UNIQUE NOT NULL,
     title VARCHAR(255) NOT NULL,
     description TEXT,
     level VARCHAR(50),
+    image_url TEXT,
+    tags TEXT[],
+    prerequisites TEXT[],
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -48,6 +54,7 @@ CREATE TABLE IF NOT EXISTS chapters (
     content TEXT NOT NULL,
     is_quiz BOOLEAN DEFAULT false,
     "order" INTEGER NOT NULL,
+    video_url TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -120,6 +127,8 @@ CREATE TABLE IF NOT EXISTS posts (
     content TEXT NOT NULL,
     author_id UUID REFERENCES users(id) ON DELETE SET NULL,
     published_at TIMESTAMPTZ,
+    image_url TEXT,
+    tags TEXT[],
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -131,6 +140,16 @@ CREATE TABLE IF NOT EXISTS inquiries (
     type VARCHAR(50) NOT NULL,
     message TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS "references" (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    title VARCHAR(255) NOT NULL,
+    url TEXT NOT NULL,
+    description TEXT,
+    type VARCHAR(100) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
         "#;
 
@@ -150,6 +169,7 @@ CREATE TABLE IF NOT EXISTS inquiries (
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         let sql = r#"
+DROP TABLE IF EXISTS "references";
 DROP TABLE IF EXISTS inquiries;
 DROP TABLE IF EXISTS posts;
 DROP TABLE IF EXISTS notifications;

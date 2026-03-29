@@ -1,0 +1,34 @@
+{
+  "id": "rust-microservices",
+  "slug": "rust-microservices",
+  "title": {
+    "EN": "Microservices & Distributed Systems",
+    "ES": "Microservicios y Sistemas Distribuidos"
+  },
+  "description": {
+    "EN": "🚧 COMING SOON. Designing scalable systems with Rust, Kubernetes, Helm, and gRPC.",
+    "ES": "🚧 PRÓXIMAMENTE. Diseñando sistemas escalables con Rust, Kubernetes, Helm y gRPC."
+  },
+  "level": "Architecture",
+  "tags": [
+    "Microservices",
+    "K8s",
+    "Distributed",
+    "Helm"
+  ],
+  "thumbnail": "https://placehold.co/800x500/2A2A2A/CE412B/png?text=Microservices&font=roboto",
+  "modules": [
+    {
+      "id": "cs-mod",
+      "title": {
+        "EN": "Coming Soon",
+        "ES": "Próximamente"
+      },
+      "chapters": []
+    }
+  ],
+  "prerequisites": [
+    "rust-backend"
+  ],
+  "previewCode": "// gRPC Service Definition\nservice PaymentService {\n  rpc Process (PaymentReq) returns (PaymentRes);\n}\n\n// Kubernetes deployment\napiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: rust-microservice"
+}

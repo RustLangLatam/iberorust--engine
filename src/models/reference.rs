@@ -7,9 +7,11 @@ use uuid::Uuid;
 pub struct Reference {
     #[schema(value_type = String)]
     pub id: Uuid,
-    pub title: String,
+    #[schema(value_type = Object)]
+    pub title: serde_json::Value,
     pub url: String,
-    pub description: Option<String>,
+    #[schema(value_type = Object)]
+    pub description: Option<serde_json::Value>,
     pub r#type: String,
     #[schema(value_type = String)]
     pub created_at: DateTime<Utc>,
@@ -19,16 +21,20 @@ pub struct Reference {
 
 #[derive(Debug, Deserialize, ToSchema)]
 pub struct CreateReference {
-    pub title: String,
+    #[schema(value_type = Object)]
+    pub title: serde_json::Value,
     pub url: String,
-    pub description: Option<String>,
+    #[schema(value_type = Object)]
+    pub description: Option<serde_json::Value>,
     pub r#type: String,
 }
 
 #[derive(Debug, Deserialize, ToSchema)]
 pub struct UpdateReference {
-    pub title: Option<String>,
+    #[schema(value_type = Object)]
+    pub title: Option<serde_json::Value>,
     pub url: Option<String>,
-    pub description: Option<String>,
+    #[schema(value_type = Object)]
+    pub description: Option<serde_json::Value>,
     pub r#type: Option<String>,
 }

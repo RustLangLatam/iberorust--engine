@@ -7,12 +7,15 @@ use uuid::Uuid;
 pub struct Course {
     #[schema(value_type = String)]
     pub id: Uuid,
+    pub slug: String,
     #[schema(value_type = Object)]
     pub title: serde_json::Value,
     #[schema(value_type = Object)]
     pub description: Option<serde_json::Value>,
     pub level: Option<String>,
     pub image_url: Option<String>,
+    pub tags: Option<Vec<String>>,
+    pub prerequisites: Option<Vec<String>>,
     #[schema(value_type = String)]
     pub created_at: DateTime<Utc>,
     #[schema(value_type = String)]
@@ -58,12 +61,15 @@ pub struct Chapter {
 pub struct CourseDetails {
     #[schema(value_type = String)]
     pub id: Uuid,
+    pub slug: String,
     #[schema(value_type = Object)]
     pub title: serde_json::Value,
     #[schema(value_type = Object)]
     pub description: Option<serde_json::Value>,
     pub level: Option<String>,
     pub image_url: Option<String>,
+    pub tags: Option<Vec<String>>,
+    pub prerequisites: Option<Vec<String>>,
     pub modules: Vec<ModuleDetails>,
 }
 
@@ -92,12 +98,15 @@ pub struct ChapterSummary {
 
 #[derive(Debug, Deserialize, ToSchema)]
 pub struct CreateCourse {
+    pub slug: String,
     #[schema(value_type = Object)]
     pub title: serde_json::Value,
     #[schema(value_type = Object)]
     pub description: Option<serde_json::Value>,
     pub level: Option<String>,
     pub image_url: Option<String>,
+    pub tags: Option<Vec<String>>,
+    pub prerequisites: Option<Vec<String>>,
 }
 
 #[derive(Debug, Deserialize, ToSchema)]
@@ -140,10 +149,13 @@ pub struct UpdateChapter {
 
 #[derive(Debug, Deserialize, ToSchema)]
 pub struct UpdateCourse {
+    pub slug: Option<String>,
     #[schema(value_type = Object)]
     pub title: Option<serde_json::Value>,
     #[schema(value_type = Object)]
     pub description: Option<serde_json::Value>,
     pub level: Option<String>,
     pub image_url: Option<String>,
+    pub tags: Option<Vec<String>>,
+    pub prerequisites: Option<Vec<String>>,
 }

@@ -253,7 +253,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let auth_service = Arc::new(services::auth::AuthService::new(user_repo.clone(), app_config.auth.jwt_secret.clone()));
     let user_service = Arc::new(services::user::UserService::new(user_repo.clone()));
-    let course_service = Arc::new(services::course::CourseService::new(course_repo.clone()));
+    let course_service = Arc::new(services::course::CourseService::new(course_repo.clone(), progress_repo.clone()));
     let progress_service = Arc::new(services::progress::ProgressService::new(
         progress_repo.clone(),
         course_repo.clone(),
@@ -300,7 +300,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let app = Router::new()
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
         .nest("/api/v1", api_routes)
-        .layer(TraceLayer::new_for_http())
+        .layer(
+            TraceLayer::new_for_http()
+                .make_span_with(tower_http::trace::DefaultMakeSpan::new().level(tracing::Level::INFO))
+                .on_response(tower_http::trace::DefaultOnResponse::new().level(tracing::Level::INFO))
+                .on_failure(tower_http::trace::DefaultOnFailure::new().level(tracing::Level::ERROR))
+        )
         .layer(cors)
         .with_state(state);
 

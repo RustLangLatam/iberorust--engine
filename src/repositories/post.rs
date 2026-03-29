@@ -28,7 +28,7 @@ impl From<PostEntity::Model> for Post {
         Self {
             id: model.id,
             title: serde_json::from_str(&model.title).unwrap_or_else(|_| serde_json::Value::String(model.title.clone())),
-            content: model.content,
+            content: serde_json::from_str(&model.content).unwrap_or_else(|_| serde_json::Value::String(model.content.clone())),
             image_url: model.image_url,
             tags: model.tags,
             author_id: model.author_id,
@@ -67,6 +67,7 @@ impl PostRepository for PostRepositoryImpl {
             .map(|p| PostSummary {
                 id: p.id,
                 title: serde_json::from_str(&p.title).unwrap_or_else(|_| serde_json::Value::String(p.title.clone())),
+                content: serde_json::from_str(&p.content).unwrap_or_else(|_| serde_json::Value::String(p.content.clone())),
                 image_url: p.image_url,
                 tags: p.tags,
                 author_id: p.author_id,
@@ -87,7 +88,7 @@ impl PostRepository for PostRepositoryImpl {
         let new_post = PostEntity::ActiveModel {
             id: Set(Uuid::new_v4()),
             title: Set(req.title.to_string()),
-            content: Set(req.content),
+            content: Set(req.content.to_string()),
             image_url: Set(req.image_url),
             tags: Set(req.tags),
             author_id: Set(Some(author_id)),
@@ -112,7 +113,7 @@ impl PostRepository for PostRepositoryImpl {
             p.title = Set(title.to_string());
         }
         if let Some(content) = req.content {
-            p.content = Set(content);
+            p.content = Set(content.to_string());
         }
         if let Some(image_url) = req.image_url {
             p.image_url = Set(Some(image_url));

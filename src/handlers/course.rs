@@ -72,9 +72,11 @@ pub async fn get_course(
 )]
 pub async fn get_chapter(
     State(state): State<SharedState>,
+    user: crate::middlewares::auth::OptionalAuthUser,
     Path((course_id, chapter_id)): Path<(Uuid, Uuid)>,
 ) -> Result<Json<Chapter>, AppError> {
-    let chapter = state.course_service.get_chapter_details(course_id, chapter_id).await?;
+    let user_id = user.0.map(|u| u.id);
+    let chapter = state.course_service.get_chapter_details(user_id, course_id, chapter_id).await?;
     Ok(Json(chapter))
 }
 

@@ -1,6 +1,7 @@
 use crate::error::AppError;
 use crate::models::course::{ChapterSummary, Course, Module};
 use crate::repositories::course::MockCourseRepository;
+use crate::repositories::progress::MockProgressRepository;
 use crate::services::course::CourseService;
 use chrono::Utc;
 use std::sync::Arc;
@@ -20,10 +21,13 @@ async fn test_get_course_structure_with_modules() {
         .returning(move |id| {
             Ok(Some(Course {
                 id,
+                slug: "rust-for-beginners".to_string(),
                 title: serde_json::Value::String("Rust for Beginners".to_string()),
                 description: Some(serde_json::Value::String("Learn Rust".to_string())),
                 level: Some("Beginner".to_string()),
                 image_url: None,
+                tags: None,
+                prerequisites: None,
                 created_at: Utc::now(),
                 updated_at: Utc::now(),
             }))
@@ -59,7 +63,8 @@ async fn test_get_course_structure_with_modules() {
             }])
         });
 
-    let service = CourseService::new(Arc::new(mock_repo));
+    let mock_progress_repo = MockProgressRepository::new();
+    let service = CourseService::new(Arc::new(mock_repo), Arc::new(mock_progress_repo));
 
     let structure = service
         .get_course_structure(course_id)
@@ -85,7 +90,8 @@ async fn test_get_course_structure_not_found() {
         .times(1)
         .returning(move |_id| Ok(None)); // Not found
 
-    let service = CourseService::new(Arc::new(mock_repo));
+    let mock_progress_repo = MockProgressRepository::new();
+    let service = CourseService::new(Arc::new(mock_repo), Arc::new(mock_progress_repo));
 
     let result = service.get_course_structure(course_id).await;
 

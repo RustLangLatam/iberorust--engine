@@ -22,6 +22,7 @@ WORKDIR /app
 
 # Copy the compiled binary from the builder stage
 COPY --from=builder /usr/src/app/target/release/app ./app
+COPY config.toml ./config.toml
 
 # Expose the application port
 EXPOSE 3000

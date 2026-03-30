@@ -49,6 +49,8 @@ pub struct Chapter {
     pub title: serde_json::Value,
     pub content: String,
     pub is_quiz: Option<bool>,
+    #[schema(value_type = Object)]
+    pub quiz_data: Option<serde_json::Value>,
     pub video_url: Option<String>,
     pub order: i32,
     #[schema(value_type = String)]
@@ -92,6 +94,8 @@ pub struct ChapterSummary {
     #[schema(value_type = Object)]
     pub title: serde_json::Value,
     pub is_quiz: Option<bool>,
+    #[schema(value_type = Object)]
+    pub quiz_data: Option<serde_json::Value>,
     pub video_url: Option<String>,
     pub order: i32,
 }
@@ -133,6 +137,8 @@ pub struct CreateChapter {
     pub title: serde_json::Value,
     pub content: String,
     pub is_quiz: Option<bool>,
+    #[schema(value_type = Object)]
+    pub quiz_data: Option<serde_json::Value>,
     pub video_url: Option<String>,
     pub order: i32,
 }
@@ -143,6 +149,8 @@ pub struct UpdateChapter {
     pub title: Option<serde_json::Value>,
     pub content: Option<String>,
     pub is_quiz: Option<bool>,
+    #[schema(value_type = Object)]
+    pub quiz_data: Option<serde_json::Value>,
     pub video_url: Option<String>,
     pub order: Option<i32>,
 }

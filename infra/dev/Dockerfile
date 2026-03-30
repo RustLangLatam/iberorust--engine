@@ -5,13 +5,22 @@ RUN apt-get update && apt-get install -y pkg-config libssl-dev curl && rm -rf /v
 
 WORKDIR /usr/src/app
 
-# Copy the source code
+# Build dependencies first to cache them
 COPY Cargo.toml Cargo.lock ./
+COPY migration/Cargo.toml ./migration/Cargo.toml
+# Create dummy src files to trick Cargo into building dependencies
+RUN mkdir src && echo "fn main() {}" > src/main.rs
+RUN mkdir -p migration/src && echo "fn main() {}" > migration/src/lib.rs
+RUN cargo build --release
+# Remove the dummy files
+RUN rm -rf src migration/src
+
+# Now copy the actual source code
 COPY src ./src
 COPY migration ./migration
 
-# Build the application
-RUN cargo build --release
+# Touch the main file so cargo rebuilds the application and install it to a known directory
+RUN touch src/main.rs && cargo install --path . --root /usr/src/app/out
 
 FROM debian:bookworm-slim
 
@@ -20,8 +29,8 @@ RUN apt-get update && apt-get install -y libssl3 ca-certificates && rm -rf /var/
 
 WORKDIR /app
 
-# Copy the compiled binary from the builder stage
-COPY --from=builder /usr/src/app/target/release/app ./app
+# Copy the compiled binary from the builder stage using the generic bin directory
+COPY --from=builder /usr/src/app/out/bin/* ./app
 COPY config.toml ./config.toml
 
 # Expose the application port

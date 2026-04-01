@@ -77,6 +77,7 @@ impl From<chapter::Model> for Chapter {
             content: model.content,
             is_quiz: model.is_quiz,
             quiz_data: model.quiz_data,
+            code_snippet: model.code_snippet,
             video_url: model.video_url,
             order: model.order,
             created_at: model.created_at,
@@ -137,6 +138,7 @@ impl CourseRepository for CourseRepositoryImpl {
                 title: serde_json::from_str(&c.title).unwrap_or_else(|_| serde_json::Value::String(c.title.clone())),
                 is_quiz: c.is_quiz,
                 quiz_data: c.quiz_data,
+                code_snippet: c.code_snippet,
                 video_url: c.video_url,
                 order: c.order,
             })
@@ -286,6 +288,7 @@ impl CourseRepository for CourseRepositoryImpl {
             content: Set(req.content),
             is_quiz: Set(req.is_quiz),
             quiz_data: Set(req.quiz_data),
+            code_snippet: Set(req.code_snippet),
             video_url: Set(req.video_url),
             order: Set(req.order),
             created_at: Set(Utc::now()),
@@ -315,6 +318,9 @@ impl CourseRepository for CourseRepositoryImpl {
         }
         if let Some(quiz_data) = req.quiz_data {
             ch.quiz_data = Set(Some(quiz_data));
+        }
+        if let Some(code_snippet) = req.code_snippet {
+            ch.code_snippet = Set(Some(code_snippet));
         }
         if let Some(video_url) = req.video_url {
             ch.video_url = Set(Some(video_url));

@@ -59,6 +59,7 @@ async fn test_get_course_structure_with_modules() {
                 title: serde_json::Value::String("Hello World".to_string()),
                 is_quiz: Some(false),
                 quiz_data: None,
+                code_snippet: None,
                 video_url: None,
                 order: 1,
             }])

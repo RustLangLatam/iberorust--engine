@@ -53,6 +53,8 @@ CREATE TABLE IF NOT EXISTS chapters (
     title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
     is_quiz BOOLEAN DEFAULT false,
+    quiz_data JSONB,
+    code_snippet TEXT,
     "order" INTEGER NOT NULL,
     video_url TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

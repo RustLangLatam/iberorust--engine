@@ -1,0 +1,35 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: postgres_dev
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: dev123
+      POSTGRES_DB: rustedu_database
+    ports:
+      - "5432:5432"
+    volumes:
+      - rustedu_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d rustedu_database"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: ../../
+      dockerfile: infra/dev/Dockerfile
+    container_name: app_dev
+    environment:
+      # Connect using the compose service name "db" instead of "localhost"
+      APP_DATABASE_URL: "postgres://root:dev123@db:5432/rustedu_database"
+      # Other variables can also go here
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  rustedu_postgres_data:
